@@ -1,35 +1,76 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// import { Routes, Route } from "react-router-dom";
+// import ScrollToTop from "./components/components";
+// import Home from "./pages/Home";
+// import ShotTracer from "./pages/ShotTracer";
+// import AboutPage from "./pages/AboutPage";
+// import TermsPage from "./pages/TermsPage";
+// import ContactPage from "./pages/ContactPage";
+// import FAQPage from "./pages/FAQPage";
+// import Footer from "./components/Footer";
+// import Navbar from "./components/Navbar";
+// import "./index.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+// const App = () => (
+//   <div className="flex flex-col min-h-screen bg-black">
+//     <Navbar />
+//     <main className="flex-grow">
+//       <Routes>
+//         <Route path="/" element={<Home />} />
+//         <Route path="/shot-tracer" element={<ShotTracer />} />
+//         <Route path="/about" element={<AboutPage />} />
+//         <Route path="/contact" element={<ContactPage />} />
+//         <Route path="/faq" element={<FAQPage />} />
+//         <Route path="/terms" element={<TermsPage />} />
+//         <Route path="/privacy" element={<TermsPage />} />
+//       </Routes>
+//     </main>
+//     <Footer />
+//     <ScrollToTop />
+//   </div>
+// );
+
+// export default App;
+
+import { Routes, Route, useLocation } from "react-router-dom";
+import ScrollToTop from "./components/components";
+import Home from "./pages/Home";
+import ShotTracer from "./pages/ShotTracer";
+import AboutPage from "./pages/AboutPage";
+import TermsPage from "./pages/TermsPage";
+import ContactPage from "./pages/ContactPage";
+import FAQPage from "./pages/FAQPage";
+import Footer from "./components/Footer";
+import Navbar from "./components/Navbar";
+import "./index.css";
+
+const App = () => {
+  const location = useLocation();
+  const isShotTracer = location.pathname === "/shot-tracer";
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div
+      className={`flex flex-col min-h-screen bg-black ${
+        isShotTracer ? "overflow-hidden h-screen" : ""
+      }`}
+    >
+      {!isShotTracer && <Navbar />}
 
-export default App
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/shot-tracer" element={<ShotTracer />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<TermsPage />} />
+        </Routes>
+      </main>
+
+      {!isShotTracer && <Footer />}
+      {!isShotTracer && <ScrollToTop />}
+    </div>
+  );
+};
+
+export default App;
