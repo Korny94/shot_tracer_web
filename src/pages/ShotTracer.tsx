@@ -19,7 +19,7 @@
 //   ChevronLeft,
 //   Check,
 //   MousePointer2,
-//   Gamepad2,
+//   Move,
 // } from "lucide-react";
 // import TargetImg from "../assets/target.png";
 
@@ -222,7 +222,7 @@
 //         onDrag={(_, info) => onMove(info.delta.x * 3, info.delta.y * 3)}
 //         className="w-12 h-12 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)] z-10 cursor-move active:cursor-grabbing flex items-center justify-center"
 //       >
-//         <Gamepad2 size={20} className="text-black" />
+//         <Move size={20} className="text-black" />
 //       </motion.div>
 //       <span className="absolute bottom-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest pointer-events-none">
 //         Curve Adjust
@@ -279,9 +279,9 @@
 //     "solid"
 //   );
 //   const [tracerColor, setTracerColor] = useState("#ff0000");
-//   const [tracerOpacity, setTracerOpacity] = useState(0.9);
+//   const [tracerOpacity, setTracerOpacity] = useState(0.8);
 
-//   const [tracerWidth, setTracerWidth] = useState(10);
+//   const [tracerWidth, setTracerWidth] = useState(12);
 //   const [widgetScale, setWidgetScale] = useState(1);
 //   const [showShadow, setShowShadow] = useState(true);
 //   const [showTarget, setShowTarget] = useState(false);
@@ -507,8 +507,6 @@
 //     setPlacingMode(null);
 //   };
 
-//   // --- TRACER ENGINE ---
-
 //   const tracerData = useMemo(() => {
 //     if (!impactPoint || !landingPoint) return null;
 
@@ -530,7 +528,7 @@
 //     const fullCurve = sampleRollerCoaster(impactPoint, cp, landingPoint, N);
 
 //     // Basic visible slice
-//     let endIdx = Math.floor(floatIdx);
+//     const endIdx = Math.floor(floatIdx);
 //     let visiblePts = fullCurve.slice(0, endIdx + 1);
 
 //     // Sub-pixel tip accuracy
@@ -549,30 +547,28 @@
 //     let startIdx = 0;
 
 //     // --- MODE LOGIC ---
-//     const apexIdx = Math.floor(N * 0.85); // Changed from 0.75 to 0.85
-
-//     let tailWidthFactor = 1.0;
 
 //     if (tracerMode === "comet") {
-//       const tailLen = Math.floor(N * 0.2);
+//       // MODIFIED: Start cutting tail earlier at 60% instead of 85%
+//       const hybridCutStartIdx = Math.floor(N * 0.3); // 60% instead of apexIdx
 
-//       if (isLanded) {
-//         // Slower Worm: 1.5s to disappear
-//         endIdx = N;
-//         const timeSinceLand = currentTime - landingPoint.time;
-//         const wormProgress = Math.min(1, timeSinceLand / 1.5);
+//       // Start shrinking tail after hybridCutStartIdx (60%)
+//       if (endIdx > hybridCutStartIdx || isLanded) {
+//         // Shrink logic
+//         const progressPastCutStart =
+//           (floatIdx - hybridCutStartIdx) / (N - hybridCutStartIdx - 15);
+//         startIdx = Math.floor(progressPastCutStart * (N * 0.8));
 
-//         const baseStart = Math.max(0, N - tailLen);
-//         startIdx = baseStart + Math.floor((N - baseStart) * wormProgress);
+//         if (isLanded) {
+//           // Slow shrink at end (1.5s)
+//           const timeSinceLand = currentTime - landingPoint.time;
+//           const shrinkFactor = Math.min(1, timeSinceLand / 1.5);
+//           startIdx = startIdx + Math.floor((N - startIdx) * shrinkFactor);
+//         }
 
-//         visiblePts = fullCurve.slice(startIdx, N + 1);
-//       } else {
-//         startIdx = Math.max(0, visiblePts.length - tailLen);
+//         if (startIdx >= visiblePts.length) startIdx = visiblePts.length - 1;
 //         visiblePts = visiblePts.slice(startIdx);
 //       }
-
-//       // Slim tail if past apex
-//       if (endIdx > apexIdx) tailWidthFactor = 0.6;
 //     } else if (tracerMode === "hybrid") {
 //       // MODIFIED: Start cutting tail earlier at 60% instead of 85%
 //       const hybridCutStartIdx = Math.floor(N * 0.6); // 60% instead of apexIdx
@@ -594,33 +590,58 @@
 //         if (startIdx >= visiblePts.length) startIdx = visiblePts.length - 1;
 //         visiblePts = visiblePts.slice(startIdx);
 //       }
-//       tailWidthFactor = 0.7; // Hybrid generally slimmer tail
 //     }
 
 //     if (visiblePts.length < 2) return null;
 
-//     // Generate Path with dynamic widths
-//     const dMain = buildTaperedRibbonPath(
-//       visiblePts,
-//       tracerWidth,
-//       tracerWidth * 0.4 * tailWidthFactor
-//     );
-
-//     // Correct Shadow Logic: Project subset using GLOBAL indices
+//     // Generate Path - DIFFERENT APPROACH FOR COMET MODE
+//     let dMain = "";
 //     let dShadow = "";
-//     if (showShadow) {
-//       const groundPts = projectSubsetToGroundUsingGlobal(
+
+//     if (tracerMode === "comet" || tracerMode === "hybrid") {
+//       dMain = buildTaperedRibbonPath(
 //         visiblePts,
-//         startIdx,
-//         N,
-//         impactPoint.y,
-//         landingPoint.y
+//         tracerWidth * 0.5,
+//         tracerWidth * 0.3
 //       );
-//       dShadow = buildTaperedRibbonPath(
-//         groundPts,
-//         tracerWidth * 0.8,
-//         tracerWidth * 0.3 * tailWidthFactor
+
+//       if (showShadow) {
+//         const groundPts = projectSubsetToGroundUsingGlobal(
+//           visiblePts,
+//           startIdx,
+//           N,
+//           impactPoint.y,
+//           landingPoint.y
+//         );
+//         // Shadow also uses constant width (80% of main width)
+//         dShadow = buildTaperedRibbonPath(
+//           groundPts,
+//           tracerWidth * 0.5,
+//           tracerWidth * 0.3
+//         );
+//       }
+//     } else {
+//       // SOLID Use tapered width
+//       dMain = buildTaperedRibbonPath(
+//         visiblePts,
+//         tracerWidth,
+//         tracerWidth * 0.275
 //       );
+
+//       if (showShadow) {
+//         const groundPts = projectSubsetToGroundUsingGlobal(
+//           visiblePts,
+//           startIdx,
+//           N,
+//           impactPoint.y,
+//           landingPoint.y
+//         );
+//         dShadow = buildTaperedRibbonPath(
+//           groundPts,
+//           tracerWidth * 0.8,
+//           tracerWidth * 0.3
+//         );
+//       }
 //     }
 
 //     return { dMain, dShadow, easedProgress };
@@ -743,11 +764,11 @@
 //                     height="200%"
 //                   >
 //                     <feDropShadow
-//                       dx="0"
-//                       dy=""
-//                       stdDeviation="3"
+//                       dx=".5"
+//                       dy="2.5"
+//                       stdDeviation="1.5"
 //                       floodColor="#000"
-//                       floodOpacity="0.45"
+//                       floodOpacity=".65"
 //                     />
 //                   </filter>
 //                 </defs>
@@ -971,7 +992,7 @@
 //           {controlPoint && (
 //             <div className="space-y-2">
 //               <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-//                 <Gamepad2 size={12} /> Adjust Curve
+//                 <Move size={12} /> Adjust Curve
 //               </div>
 //               <VirtualJoystick
 //                 onMove={(dx, dy) => {
@@ -1037,42 +1058,6 @@
 //                 </button>
 //               ))}
 //             </div>
-//             {/* <div className="flex items-center justify-between">
-//               <div className="flex gap-1.5">
-//                 <input
-//                   type="color"
-//                   value={tracerColor}
-//                   onChange={(e) => setTracerColor(e.target.value)}
-//                   className="w-6 h-6 rounded-full bg-transparent border-none cursor-pointer p-0"
-//                 />
-//                 {["#ff0000", "#3b82f6", "#eab308", "#ffffff"].map((c) => (
-//                   <button
-//                     key={c}
-//                     onClick={() => setTracerColor(c)}
-//                     className={`w-6 h-6 rounded-full border-2 ${
-//                       tracerColor === c
-//                         ? "border-white scale-110"
-//                         : "border-transparent"
-//                     }`}
-//                     style={{ backgroundColor: c }}
-//                   />
-//                 ))}
-//               </div>
-//             </div>
-//             <div className="space-y-1">
-//               <div className="flex justify-between text-[10px] text-gray-400">
-//                 <span>Width</span>
-//                 <span>{tracerWidth}px</span>
-//               </div>
-//               <input
-//                 type="range"
-//                 min={4}
-//                 max={16}
-//                 value={tracerWidth}
-//                 onChange={(e) => setTracerWidth(Number(e.target.value))}
-//                 className="w-full h-1 bg-zinc-800 rounded-lg appearance-none accent-amber-500"
-//               />
-//             </div> */}
 //             <div className="flex items-center justify-between">
 //               <div className="flex gap-1.5">
 //                 <input
@@ -1121,8 +1106,8 @@
 //               </div>
 //               <input
 //                 type="range"
-//                 min={4}
-//                 max={16}
+//                 min={8}
+//                 max={20}
 //                 value={tracerWidth}
 //                 onChange={(e) => setTracerWidth(Number(e.target.value))}
 //                 className="w-full h-1 bg-zinc-800 rounded-lg appearance-none accent-amber-500"
@@ -1131,73 +1116,6 @@
 //           </div>
 
 //           <div className="w-full h-px bg-white/5" />
-
-//           {/* WIDGETS */}
-//           {/* <div className="space-y-3">
-//             <div className="flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-//               <span>Widgets</span>
-//               <div className="flex items-center gap-2">
-//                 <span className="text-[9px]">Scale</span>
-//                 <input
-//                   type="range"
-//                   min={0.5}
-//                   max={1.5}
-//                   step={0.1}
-//                   value={widgetScale}
-//                   onChange={(e) => setWidgetScale(Number(e.target.value))}
-//                   className="w-16 h-1 bg-zinc-800 rounded-lg accent-amber-500"
-//                 />
-//               </div>
-//             </div>
-
-//             {[
-//               {
-//                 label: "Distance",
-//                 icon: Ruler,
-//                 val: showDistance,
-//                 set: setShowDistance,
-//               },
-//               {
-//                 label: "Target",
-//                 icon: Target,
-//                 val: showTarget,
-//                 set: setShowTarget,
-//               },
-//               {
-//                 label: "Hole Info",
-//                 icon: Info,
-//                 val: showHoleInfo,
-//                 set: setShowHoleInfo,
-//               },
-//               {
-//                 label: "Shadow",
-//                 icon: MousePointer2,
-//                 val: showShadow,
-//                 set: setShowShadow,
-//               },
-//             ].map((item) => (
-//               <div
-//                 key={item.label}
-//                 className="flex items-center justify-between bg-zinc-900/50 p-2 rounded-lg border border-white/5"
-//               >
-//                 <div className="flex items-center gap-2 text-xs font-bold text-gray-300">
-//                   <item.icon size={14} className="text-gray-500" /> {item.label}
-//                 </div>
-//                 <button
-//                   onClick={() => item.set(!item.val)}
-//                   className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-//                     item.val
-//                       ? "bg-amber-500 border-amber-500"
-//                       : "border-gray-600 bg-transparent"
-//                   }`}
-//                 >
-//                   {item.val && (
-//                     <Check size={10} className="text-black" strokeWidth={4} />
-//                   )}
-//                 </button>
-//               </div>
-//             ))}
-//           </div> */}
 //           <div className="space-y-3">
 //             <div className="flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest">
 //               <span>Widgets</span>
@@ -1344,8 +1262,6 @@
 //     </div>
 //   );
 // }
-
-// ------------------------------------------------------------------------------------------------------------
 
 import React, {
   useState,
@@ -1856,6 +1772,154 @@ export default function ShotTracerWeb() {
     setPlacingMode(null);
   };
 
+  // const tracerData = useMemo(() => {
+  //   if (!impactPoint || !landingPoint) return null;
+
+  //   const cp = controlPoint || {
+  //     x: (impactPoint.x + landingPoint.x) / 2,
+  //     y: Math.min(impactPoint.y, landingPoint.y) - 200,
+  //   };
+
+  //   const totalDuration = Math.max(0.1, landingPoint.time - impactPoint.time);
+  //   const rawProgress = (currentTime - impactPoint.time) / totalDuration;
+  //   const easedProgress = Math.pow(Math.max(0, Math.min(1, rawProgress)), 0.4);
+
+  //   if (easedProgress <= 0) return null;
+
+  //   const N = 240;
+  //   const floatIdx = easedProgress * N;
+
+  //   // USE THE NEW ROLLER COASTER CURVE HERE
+  //   const fullCurve = sampleRollerCoaster(impactPoint, cp, landingPoint, N);
+
+  //   // Basic visible slice
+  //   const endIdx = Math.floor(floatIdx);
+  //   let visiblePts = fullCurve.slice(0, endIdx + 1);
+
+  //   // Sub-pixel tip accuracy
+  //   if (easedProgress < 1) {
+  //     // USE THE NEW ROLLER COASTER POINT FUNCTION HERE
+  //     const exactTip = getRollerCoasterPoint(
+  //       impactPoint,
+  //       cp,
+  //       landingPoint,
+  //       easedProgress
+  //     );
+  //     visiblePts.push(exactTip);
+  //   }
+
+  //   const isLanded = currentTime > landingPoint.time;
+  //   let startIdx = 0;
+
+  //   // --- MODE LOGIC ---
+
+  //   if (tracerMode === "comet") {
+  //     // MODIFIED: Start cutting tail earlier at 60% instead of 85%
+  //     const hybridCutStartIdx = Math.floor(N * 0.3); // 60% instead of apexIdx
+
+  //     // Start shrinking tail after hybridCutStartIdx (60%)
+  //     if (endIdx > hybridCutStartIdx || isLanded) {
+  //       // Shrink logic
+  //       const progressPastCutStart =
+  //         (floatIdx - hybridCutStartIdx) / (N - hybridCutStartIdx - 15);
+  //       startIdx = Math.floor(progressPastCutStart * (N * 0.8));
+
+  //       if (isLanded) {
+  //         // Slow shrink at end (1.5s)
+  //         const timeSinceLand = currentTime - landingPoint.time;
+  //         const shrinkFactor = Math.min(1, timeSinceLand / 1.5);
+  //         startIdx = startIdx + Math.floor((N - startIdx) * shrinkFactor);
+  //       }
+
+  //       if (startIdx >= visiblePts.length) startIdx = visiblePts.length - 1;
+  //       visiblePts = visiblePts.slice(startIdx);
+  //     }
+  //   } else if (tracerMode === "hybrid") {
+  //     // MODIFIED: Start cutting tail earlier at 60% instead of 85%
+  //     const hybridCutStartIdx = Math.floor(N * 0.6); // 60% instead of apexIdx
+
+  //     // Start shrinking tail after hybridCutStartIdx (60%)
+  //     if (endIdx > hybridCutStartIdx || isLanded) {
+  //       // Shrink logic
+  //       const progressPastCutStart =
+  //         (floatIdx - hybridCutStartIdx) / (N - hybridCutStartIdx);
+  //       startIdx = Math.floor(progressPastCutStart * (N * 0.8));
+
+  //       if (isLanded) {
+  //         // Slow shrink at end (1.5s)
+  //         const timeSinceLand = currentTime - landingPoint.time;
+  //         const shrinkFactor = Math.min(1, timeSinceLand / 1.5);
+  //         startIdx = startIdx + Math.floor((N - startIdx) * shrinkFactor);
+  //       }
+
+  //       if (startIdx >= visiblePts.length) startIdx = visiblePts.length - 1;
+  //       visiblePts = visiblePts.slice(startIdx);
+  //     }
+  //   }
+
+  //   if (visiblePts.length < 2) return null;
+
+  //   // Generate Path - DIFFERENT APPROACH FOR COMET MODE
+  //   let dMain = "";
+  //   let dShadow = "";
+
+  //   if (tracerMode === "comet" || tracerMode === "hybrid") {
+  //     dMain = buildTaperedRibbonPath(
+  //       visiblePts,
+  //       tracerWidth * 0.5,
+  //       tracerWidth * 0.3
+  //     );
+
+  //     if (showShadow) {
+  //       const groundPts = projectSubsetToGroundUsingGlobal(
+  //         visiblePts,
+  //         startIdx,
+  //         N,
+  //         impactPoint.y,
+  //         landingPoint.y
+  //       );
+  //       // Shadow also uses constant width (80% of main width)
+  //       dShadow = buildTaperedRibbonPath(
+  //         groundPts,
+  //         tracerWidth * 0.5,
+  //         tracerWidth * 0.3
+  //       );
+  //     }
+  //   } else {
+  //     // SOLID Use tapered width
+  //     dMain = buildTaperedRibbonPath(
+  //       visiblePts,
+  //       tracerWidth,
+  //       tracerWidth * 0.275
+  //     );
+
+  //     if (showShadow) {
+  //       const groundPts = projectSubsetToGroundUsingGlobal(
+  //         visiblePts,
+  //         startIdx,
+  //         N,
+  //         impactPoint.y,
+  //         landingPoint.y
+  //       );
+  //       dShadow = buildTaperedRibbonPath(
+  //         groundPts,
+  //         tracerWidth * 0.8,
+  //         tracerWidth * 0.3
+  //       );
+  //     }
+  //   }
+
+  //   return { dMain, dShadow, easedProgress };
+  // }, [
+  //   impactPoint,
+  //   landingPoint,
+  //   controlPoint,
+  //   currentTime,
+  //   tracerMode,
+  //   showShadow,
+  //   tracerWidth,
+  // ]);
+
   const tracerData = useMemo(() => {
     if (!impactPoint || !landingPoint) return null;
 
@@ -1993,7 +2057,18 @@ export default function ShotTracerWeb() {
       }
     }
 
-    return { dMain, dShadow, easedProgress };
+    // Calculate gradient vector for solid mode (from tail to head)
+    let gradientVector = null;
+    if (tracerMode === "solid" && visiblePts.length >= 2) {
+      gradientVector = {
+        x1: visiblePts[0].x,
+        y1: visiblePts[0].y,
+        x2: visiblePts[visiblePts.length - 1].x,
+        y2: visiblePts[visiblePts.length - 1].y,
+      };
+    }
+
+    return { dMain, dShadow, easedProgress, gradientVector, visiblePts };
   }, [
     impactPoint,
     landingPoint,
@@ -2103,7 +2178,7 @@ export default function ShotTracerWeb() {
               animate={{ opacity: globalOpacity }}
               transition={{ duration: 0.2 }}
             >
-              <svg className="absolute inset-0 w-full h-full overflow-visible z-22">
+              {/* <svg className="absolute inset-0 w-full h-full overflow-visible z-22">
                 <defs>
                   <filter
                     id="tracerDropShadow"
@@ -2135,6 +2210,83 @@ export default function ShotTracerWeb() {
                       d={tracerData.dMain}
                       fill={tracerColor}
                       fillOpacity={tracerOpacity}
+                      filter="url(#tracerDropShadow)"
+                    />
+                  </>
+                )}
+              </svg> */}
+
+              <svg className="absolute inset-0 w-full h-full overflow-visible z-22">
+                <defs>
+                  <filter
+                    id="tracerDropShadow"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feDropShadow
+                      dx=".5"
+                      dy="2.5"
+                      stdDeviation="1.5"
+                      floodColor="#000"
+                      floodOpacity=".65"
+                    />
+                  </filter>
+
+                  {/* Gradient for solid mode - only define when needed */}
+                  {tracerData &&
+                    tracerMode === "solid" &&
+                    tracerData.gradientVector && (
+                      <linearGradient
+                        id="tracerGradient"
+                        x1={tracerData.gradientVector.x1}
+                        y1={tracerData.gradientVector.y1}
+                        x2={tracerData.gradientVector.x2}
+                        y2={tracerData.gradientVector.y2}
+                        gradientUnits="userSpaceOnUse"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor={tracerColor}
+                          stopOpacity="0"
+                        />
+                        <stop
+                          offset="25%"
+                          stopColor={tracerColor}
+                          stopOpacity="0.2"
+                        />
+                        <stop
+                          offset="70%"
+                          stopColor={tracerColor}
+                          stopOpacity="0.4"
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor={tracerColor}
+                          stopOpacity={tracerOpacity}
+                        />
+                      </linearGradient>
+                    )}
+                </defs>
+
+                {tracerData && (
+                  <>
+                    {showShadow && (
+                      <path
+                        d={tracerData.dShadow}
+                        fill="black"
+                        opacity="0.25"
+                      />
+                    )}
+                    <path
+                      d={tracerData.dMain}
+                      fill={
+                        tracerMode === "solid"
+                          ? "url(#tracerGradient)"
+                          : tracerColor
+                      }
+                      fillOpacity={tracerMode === "solid" ? 1 : tracerOpacity}
                       filter="url(#tracerDropShadow)"
                     />
                   </>
