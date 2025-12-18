@@ -82,7 +82,7 @@ const ContactPage = () => {
                 MESSAGE
               </label>
               <textarea
-                rows="4"
+                rows={4}
                 value={formData.message}
                 onChange={(e) =>
                   setFormData({ ...formData, message: e.target.value })
