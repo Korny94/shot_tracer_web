@@ -144,13 +144,13 @@
 //   <div
 //     onPointerDown={(e) => onDragStart(e)}
 //     style={{ left: x, top: y }}
-//     className="absolute -ml-3 -mt-3 z-30 cursor-grab active:cursor-grabbing group touch-none"
+//     className="absolute -ml-4 -mt-4 z-30 cursor-grab active:cursor-grabbing group touch-none"
 //   >
 //     <div
-//       className="w-6 h-6 rounded-full border-2 border-white shadow-[0_2px_4px_rgba(0,0,0,0.5)] flex items-center justify-center transition-transform group-hover:scale-125"
+//       className="w-8 h-8 rounded-full border-2 border-white shadow-[0_2px_4px_rgba(0,0,0,0.5)] flex items-center justify-center transition-transform"
 //       style={{ backgroundColor: color }}
 //     >
-//       <div className="w-1.5 h-1.5 bg-white rounded-full" />
+//       <div className="w-0.75 h-0.75  bg-white rounded-full" />
 //     </div>
 //     <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black/90 text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/20 z-40">
 //       {label}
@@ -358,8 +358,9 @@
 //   const [tracerColor, setTracerColor] = useState("#ff0000");
 //   const [tracerOpacity, setTracerOpacity] = useState(0.7);
 //   const [tracerWidth, setTracerWidth] = useState(12);
-//   const [widgetScale, setWidgetScale] = useState(0.8);
-
+//   const [distanceScale, setDistanceScale] = useState(1.0);
+//   const [holeInfoScale, setHoleInfoScale] = useState(1.0);
+//   const [targetScale, setTargetScale] = useState(1.0);
 //   const [showShadow, setShowShadow] = useState(true);
 //   const [showTarget, setShowTarget] = useState(false);
 //   const [showDistance, setShowDistance] = useState(true);
@@ -377,97 +378,101 @@
 //   });
 
 //   // --- EXPORT LOGIC ---
-//   const handleExport = async () => {
-//     if (!videoRef.current || !containerRef.current) return;
-//     setIsExporting(true);
-//     setPlaying(false);
-//     setExportProgress(0);
+//   // const handleExport = async () => {
+//   //   if (!videoRef.current || !containerRef.current) return;
+//   //   setIsExporting(true);
+//   //   setPlaying(false);
+//   //   setExportProgress(0);
 
-//     const video = videoRef.current;
-//     const originalTime = video.currentTime;
+//   //   const video = videoRef.current;
+//   //   const originalTime = video.currentTime;
 
-//     try {
-//       // 1. Setup Canvas
-//       const canvas = document.createElement("canvas");
-//       const ctx = canvas.getContext("2d");
-//       if (!ctx) throw new Error("No Context");
+//   //   try {
+//   //     // 1. Setup Canvas
+//   //     const canvas = document.createElement("canvas");
+//   //     const ctx = canvas.getContext("2d");
+//   //     if (!ctx) throw new Error("No Context");
 
-//       canvas.width = video.videoWidth;
-//       canvas.height = video.videoHeight;
+//   //     canvas.width = video.videoWidth;
+//   //     canvas.height = video.videoHeight;
 
-//       // 2. Setup Recorder
-//       const stream = canvas.captureStream(30); // 30 FPS
-//       const recorder = new MediaRecorder(stream, {
-//         mimeType: "video/webm; codecs=vp9",
-//       });
-//       const chunks: Blob[] = [];
+//   //     // 2. Setup Recorder
+//   //     const stream = canvas.captureStream(30); // 30 FPS
+//   //     const recorder = new MediaRecorder(stream, {
+//   //       mimeType: "video/webm; codecs=vp9",
+//   //     });
+//   //     const chunks: Blob[] = [];
 
-//       recorder.ondataavailable = (e) => {
-//         if (e.data.size > 0) chunks.push(e.data);
-//       };
-//       recorder.onstop = () => {
-//         const blob = new Blob(chunks, { type: "video/webm" });
-//         const url = URL.createObjectURL(blob);
-//         const a = document.createElement("a");
-//         a.href = url;
-//         a.download = `MaxBogey_Tracer_${Date.now()}.webm`;
-//         a.click();
+//   //     recorder.ondataavailable = (e) => {
+//   //       if (e.data.size > 0) chunks.push(e.data);
+//   //     };
+//   //     recorder.onstop = () => {
+//   //       const blob = new Blob(chunks, { type: "video/webm" });
+//   //       const url = URL.createObjectURL(blob);
+//   //       const a = document.createElement("a");
+//   //       a.href = url;
+//   //       a.download = `MaxBogey_Tracer_${Date.now()}.webm`;
+//   //       a.click();
 
-//         // Cleanup
-//         setIsExporting(false);
-//         video.currentTime = originalTime;
-//       };
+//   //       // Cleanup
+//   //       setIsExporting(false);
+//   //       video.currentTime = originalTime;
+//   //     };
 
-//       recorder.start();
-//       video.currentTime = 0;
+//   //     recorder.start();
+//   //     video.currentTime = 0;
 
-//       // 3. Frame Loop
-//       const processFrame = () => {
-//         if (!video || video.ended || video.currentTime >= duration) {
-//           recorder.stop();
-//           return;
-//         }
+//   //     // 3. Frame Loop
+//   //     const processFrame = () => {
+//   //       if (!video || video.ended || video.currentTime >= duration) {
+//   //         recorder.stop();
+//   //         return;
+//   //       }
 
-//         // Draw Video
-//         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+//   //       // Draw Video
+//   //       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-//         // Draw Overlays manually (Simple Approach: Serialize SVG)
-//         // Note: For perfect sync, we might need to recreate geometry on canvas context
-//         // But serializing the SVG container over the video is the standard web hack.
-//         if (svgRef.current) {
-//           const xml = new XMLSerializer().serializeToString(svgRef.current);
-//           const svg64 = btoa(unescape(encodeURIComponent(xml)));
-//           const b64Start = "data:image/svg+xml;base64,";
-//           const image64 = b64Start + svg64;
+//   //       // Draw Overlays manually (Simple Approach: Serialize SVG)
+//   //       // Note: For perfect sync, we might need to recreate geometry on canvas context
+//   //       // But serializing the SVG container over the video is the standard web hack.
+//   //       if (svgRef.current) {
+//   //         const xml = new XMLSerializer().serializeToString(svgRef.current);
+//   //         const svg64 = btoa(unescape(encodeURIComponent(xml)));
+//   //         const b64Start = "data:image/svg+xml;base64,";
+//   //         const image64 = b64Start + svg64;
 
-//           const img = new Image();
-//           img.src = image64;
-//           img.onload = () => {
-//             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+//   //         const img = new Image();
+//   //         img.src = image64;
+//   //         img.onload = () => {
+//   //           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-//             // Advance Video
-//             const step = 1 / 30;
-//             video.currentTime += step;
-//             setCurrentTime(video.currentTime);
-//             setExportProgress(Math.round((video.currentTime / duration) * 100));
+//   //           // Advance Video
+//   //           const step = 1 / 30;
+//   //           video.currentTime += step;
+//   //           setCurrentTime(video.currentTime);
+//   //           setExportProgress(Math.round((video.currentTime / duration) * 100));
 
-//             // Recursive loop
-//             requestAnimationFrame(processFrame);
-//           };
-//         } else {
-//           // Fallback if no SVG ref
-//           video.currentTime += 1 / 30;
-//           requestAnimationFrame(processFrame);
-//         }
-//       };
+//   //           // Recursive loop
+//   //           requestAnimationFrame(processFrame);
+//   //         };
+//   //       } else {
+//   //         // Fallback if no SVG ref
+//   //         video.currentTime += 1 / 30;
+//   //         requestAnimationFrame(processFrame);
+//   //       }
+//   //     };
 
-//       // Start the loop
-//       processFrame();
-//     } catch (e) {
-//       console.error(e);
-//       setIsExporting(false);
-//       alert("Export failed. Please try a shorter video or different browser.");
-//     }
+//   //     // Start the loop
+//   //     processFrame();
+//   //   } catch (e) {
+//   //     console.error(e);
+//   //     setIsExporting(false);
+//   //     alert("Export failed. Please try a shorter video or different browser.");
+//   //   }
+//   // };
+
+//   const handleExport = () => {
+//     console.log("EXPORT VIDEO!");
 //   };
 
 //   // --- DRAG LOGIC ---
@@ -510,8 +515,8 @@
 //     if (["distance", "target", "holeInfo"].includes(type)) {
 //       const size = widgetSizes[type];
 //       if (size) {
-//         objW = size.w * widgetScale;
-//         objH = size.h * widgetScale;
+//         objW = size.w;
+//         objH = size.h;
 //       }
 //     }
 //     newX = Math.max(0, Math.min(rect.width - objW, newX));
@@ -672,7 +677,6 @@
 //     setPlacingMode(null);
 //   };
 
-//   // --- TRACER ENGINE ---
 //   const tracerData = useMemo(() => {
 //     if (!impactPoint || !landingPoint) return null;
 
@@ -690,16 +694,13 @@
 //     const N = 240;
 //     const floatIdx = easedProgress * N;
 
-//     // USE THE NEW ROLLER COASTER CURVE HERE
 //     const fullCurve = sampleRollerCoaster(impactPoint, cp, landingPoint, N);
 
-//     // Basic visible slice
 //     const endIdx = Math.floor(floatIdx);
 //     let visiblePts = fullCurve.slice(0, endIdx + 1);
 
-//     // Sub-pixel tip accuracy
+//     // Sub-pixel head interpolation
 //     if (easedProgress < 1) {
-//       // USE THE NEW ROLLER COASTER POINT FUNCTION HERE
 //       const exactTip = getRollerCoasterPoint(
 //         impactPoint,
 //         cp,
@@ -710,84 +711,84 @@
 //     }
 
 //     const isLanded = currentTime > landingPoint.time;
-//     let startIdx = 0;
 
-//     // --- MODE LOGIC ---
+//     // --------------------------------------------------
+//     // COMET + HYBRID (FRACTIONAL, SMOOTH TAIL SHRINK)
+//     // --------------------------------------------------
 
-//     if (tracerMode === "comet") {
-//       // MODIFIED: Start cutting tail earlier at 60% instead of 85%
-//       const hybridCutStartIdx = Math.floor(N * 0.3); // 60% instead of apexIdx
+//     if (tracerMode === "comet" || tracerMode === "hybrid") {
+//       const cutStart =
+//         tracerMode === "comet" ? Math.floor(N * 0.3) : Math.floor(N * 0.6);
 
-//       // Start shrinking tail after hybridCutStartIdx (60%)
-//       if (endIdx > hybridCutStartIdx || isLanded) {
-//         // Shrink logic
-//         const progressPastCutStart =
-//           (floatIdx - hybridCutStartIdx) / (N - hybridCutStartIdx - 15);
-//         startIdx = Math.floor(progressPastCutStart * (N * 0.8));
+//       // 🔑 DIFFERENCE BETWEEN MODES
+//       const maxTailEat =
+//         tracerMode === "comet"
+//           ? N * 0.875 // SLOWER SHRINK (FIX)
+//           : N * 0.8; // PERFECT — DO NOT TOUCH
 
-//         if (isLanded) {
-//           // Slow shrink at end (1.5s)
-//           const timeSinceLand = currentTime - landingPoint.time;
-//           const shrinkFactor = Math.min(1, timeSinceLand / 1.5);
-//           startIdx = startIdx + Math.floor((N - startIdx) * shrinkFactor);
-//         }
-
-//         if (startIdx >= visiblePts.length) startIdx = visiblePts.length - 1;
-//         visiblePts = visiblePts.slice(startIdx);
-//       }
-//     } else if (tracerMode === "hybrid") {
-//       // MODIFIED: Start cutting tail earlier at 60% instead of 85%
-//       const hybridCutStartIdx = Math.floor(N * 0.6); // 60% instead of apexIdx
-
-//       // Start shrinking tail after hybridCutStartIdx (60%)
-//       if (endIdx > hybridCutStartIdx || isLanded) {
-//         // Shrink logic
-//         const progressPastCutStart =
-//           (floatIdx - hybridCutStartIdx) / (N - hybridCutStartIdx);
-//         startIdx = Math.floor(progressPastCutStart * (N * 0.8));
+//       if (endIdx > cutStart || isLanded) {
+//         let rawStartIdx = ((floatIdx - cutStart) / (N - cutStart)) * maxTailEat;
 
 //         if (isLanded) {
-//           // Slow shrink at end (1.5s)
 //           const timeSinceLand = currentTime - landingPoint.time;
-//           const shrinkFactor = Math.min(1, timeSinceLand / 1.5);
-//           startIdx = startIdx + Math.floor((N - startIdx) * shrinkFactor);
+//           const shrinkFactor = Math.min(1, timeSinceLand / 1.9);
+//           rawStartIdx = rawStartIdx + (N - rawStartIdx) * shrinkFactor;
 //         }
 
-//         if (startIdx >= visiblePts.length) startIdx = visiblePts.length - 1;
-//         visiblePts = visiblePts.slice(startIdx);
+//         rawStartIdx = Math.max(0, Math.min(rawStartIdx, visiblePts.length - 2));
+
+//         const startIdxInt = Math.floor(rawStartIdx);
+//         const startFrac = rawStartIdx - startIdxInt;
+
+//         let slicedPts = visiblePts.slice(startIdxInt);
+
+//         // Fractional tail interpolation (critical)
+//         if (slicedPts.length >= 2 && startFrac > 0) {
+//           const p0 = visiblePts[startIdxInt];
+//           const p1 = visiblePts[startIdxInt + 1];
+
+//           slicedPts[0] = {
+//             x: p0.x + (p1.x - p0.x) * startFrac,
+//             y: p0.y + (p1.y - p0.y) * startFrac,
+//           };
+//         }
+
+//         visiblePts = slicedPts;
 //       }
 //     }
 
 //     if (visiblePts.length < 2) return null;
 
-//     // Generate Path - DIFFERENT APPROACH FOR COMET MODE
+//     // --------------------------------------------------
+//     // PATH BUILDING
+//     // --------------------------------------------------
+
 //     let dMain = "";
 //     let dShadow = "";
 
 //     if (tracerMode === "comet" || tracerMode === "hybrid") {
 //       dMain = buildTaperedRibbonPath(
 //         visiblePts,
-//         tracerWidth * 0.5,
+//         tracerWidth * 0.3,
 //         tracerWidth * 0.3
 //       );
 
 //       if (showShadow) {
 //         const groundPts = projectSubsetToGroundUsingGlobal(
 //           visiblePts,
-//           startIdx,
+//           0,
 //           N,
 //           impactPoint.y,
 //           landingPoint.y
 //         );
-//         // Shadow also uses constant width (80% of main width)
 //         dShadow = buildTaperedRibbonPath(
 //           groundPts,
-//           tracerWidth * 0.5,
+//           tracerWidth * 0.3,
 //           tracerWidth * 0.3
 //         );
 //       }
 //     } else {
-//       // SOLID Use tapered width
+//       // SOLID
 //       dMain = buildTaperedRibbonPath(
 //         visiblePts,
 //         tracerWidth,
@@ -797,7 +798,7 @@
 //       if (showShadow) {
 //         const groundPts = projectSubsetToGroundUsingGlobal(
 //           visiblePts,
-//           startIdx,
+//           0,
 //           N,
 //           impactPoint.y,
 //           landingPoint.y
@@ -810,7 +811,6 @@
 //       }
 //     }
 
-//     // Calculate gradient vector for solid mode (from tail to head)
 //     let gradientVector = null;
 //     if (tracerMode === "solid" && visiblePts.length >= 2) {
 //       gradientVector = {
@@ -1068,7 +1068,7 @@
 //                 x={widgetPos.distance.x}
 //                 y={widgetPos.distance.y}
 //                 visible={showDistance && impactPoint && landingPoint}
-//                 scale={widgetScale}
+//                 scale={distanceScale}
 //                 onDragStart={(e: any) =>
 //                   startDrag(e, "distance", widgetPos.distance)
 //                 }
@@ -1092,7 +1092,7 @@
 //                 x={widgetPos.holeInfo.x}
 //                 y={widgetPos.holeInfo.y}
 //                 visible={showHoleInfo}
-//                 scale={widgetScale}
+//                 scale={holeInfoScale}
 //                 onDragStart={(e: any) =>
 //                   startDrag(e, "holeInfo", widgetPos.holeInfo)
 //                 }
@@ -1146,7 +1146,7 @@
 //                 x={widgetPos.target.x}
 //                 y={widgetPos.target.y}
 //                 visible={showTarget}
-//                 scale={widgetScale}
+//                 scale={targetScale}
 //                 onDragStart={(e: any) =>
 //                   startDrag(e, "target", widgetPos.target)
 //                 }
@@ -1170,7 +1170,7 @@
 //               <ControlNode
 //                 x={impactPoint.x}
 //                 y={impactPoint.y}
-//                 color="#ef4444"
+//                 color="#ef444450"
 //                 label="Start"
 //                 onDragStart={(e: any) => startDrag(e, "impact", impactPoint)}
 //               />
@@ -1179,7 +1179,7 @@
 //               <ControlNode
 //                 x={landingPoint.x}
 //                 y={landingPoint.y}
-//                 color="#3b82f6"
+//                 color="#3b83f650"
 //                 label="End"
 //                 onDragStart={(e: any) => startDrag(e, "landing", landingPoint)}
 //               />
@@ -1214,20 +1214,6 @@
 //             </button>
 //           </div>
 //           <div className="flex-1 flex flex-col justify-center gap-1">
-//             {/* <input
-//               type="range"
-//               min={0}
-//               max={duration || 100}
-//               step={0.01}
-//               value={currentTime}
-//               onChange={(e) => {
-//                 const t = parseFloat(e.target.value);
-//                 setCurrentTime(t);
-//                 if (videoRef.current) videoRef.current.currentTime = t;
-//               }}
-//               className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500 hover:accent-amber-400"
-//             /> */}
-
 //             <input
 //               type="range"
 //               min={0}
@@ -1262,15 +1248,14 @@
 //       </div>
 
 //       {/* RIGHT: TOOLS SIDEBAR */}
-//       <div className="w-full lg:w-80 bg-[#0a0a0a] border-l border-white/10 flex flex-col h-[40vh] lg:h-screen overflow-y-auto shrink-0">
-//         <div className="p-5 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-10">
+//       <div className="w-full lg:w-80 bg-[#0a0a0a] border-l border-white/10 flex flex-col h-[40vh] lg:h-screen overflow-y-scroll shrink-0 z-99">
+//         <div className="p-5 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-999">
 //           <div className="flex items-center gap-2">
-//             <button
-//               onClick={() => router.push("/")}
-//               className="hover:bg-white/10 p-2 rounded transition-colors"
-//             >
-//               <Home size={18} />
-//             </button>
+//             <Link to="/">
+//               <button className="hover:bg-white/10 p-2 rounded transition-colors">
+//                 <Home size={18} />
+//               </button>
+//             </Link>
 //             <h2 className="text-base font-bold text-white tracking-wide">
 //               Studio Tools
 //             </h2>
@@ -1335,7 +1320,8 @@
 
 //           <div className="space-y-4">
 //             <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-//               <Settings2 size={12} className="inline mr-1" /> Style
+//               <Settings2 size={12} className="inline mr-1" />
+//               Tracer Style
 //             </div>
 //             <div className="flex bg-zinc-900 rounded-lg p-1 border border-white/10">
 //               {["solid", "comet", "hybrid"].map((m) => (
@@ -1352,18 +1338,47 @@
 //                 </button>
 //               ))}
 //             </div>
-//             <div className="flex gap-1.5">
-//               <input
-//                 type="color"
-//                 value={tracerColor}
-//                 onChange={(e) => setTracerColor(e.target.value)}
-//                 className="w-6 h-6 rounded-full bg-transparent border-none cursor-pointer p-0"
-//               />
+
+//             <div className="flex items-center gap-2 mt-8 mb-8">
+//               {/* Custom color (color wheel) */}
+//               <div className="relative w-7 h-7 rounded-full cursor-pointer">
+//                 {/* Color input MUST be on top */}
+//                 <input
+//                   type="color"
+//                   value={tracerColor}
+//                   onChange={(e) => setTracerColor(e.target.value)}
+//                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+//                 />
+
+//                 {/* Visual layer */}
+//                 <div className="w-7 h-7 rounded-full flex items-center justify-center relative pointer-events-none">
+//                   {/* Color wheel */}
+//                   <div
+//                     className="w-full h-full rounded-full"
+//                     style={{
+//                       background:
+//                         "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)",
+//                     }}
+//                   />
+
+//                   {/* Center dot */}
+//                   <div
+//                     className="absolute w-5 h-5 rounded-full border-4"
+//                     style={{
+//                       backgroundColor: tracerColor,
+//                       boxShadow: `0 0 4px ${tracerColor}`,
+//                       borderColor: "black",
+//                     }}
+//                   />
+//                 </div>
+//               </div>
+
+//               {/* Preset colors */}
 //               {["#ff0000", "#3b82f6", "#eab308", "#ffffff"].map((c) => (
 //                 <button
 //                   key={c}
 //                   onClick={() => setTracerColor(c)}
-//                   className={`w-6 h-6 rounded-full border-2 ${
+//                   className={`w-6 h-6 rounded-full border-2 transition ${
 //                     tracerColor === c
 //                       ? "border-white scale-110"
 //                       : "border-transparent"
@@ -1372,6 +1387,7 @@
 //                 />
 //               ))}
 //             </div>
+
 //             {/* Opacity & Width Sliders */}
 //             <div className="space-y-1 mt-2">
 //               <div className="flex justify-between text-[10px] text-gray-400">
@@ -1409,20 +1425,64 @@
 //           {/* WIDGETS CONFIG */}
 //           <div className="space-y-3">
 //             <div className="flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-//               <span>Widgets</span>
-//               <div className="flex items-center gap-2">
-//                 <span className="text-[9px]">Scale</span>
-//                 <input
-//                   type="range"
-//                   min={0.5}
-//                   max={1.5}
-//                   step={0.1}
-//                   value={widgetScale}
-//                   onChange={(e) => setWidgetScale(Number(e.target.value))}
-//                   className="w-24 h-1 bg-zinc-800 rounded-lg accent-amber-500"
-//                 />
-//               </div>
+//               <span>Graphics</span>
 //             </div>
+//             {[
+//               {
+//                 label: "Target",
+//                 icon: Target,
+//                 val: showTarget,
+//                 set: setShowTarget,
+//               },
+//             ].map((item) => (
+//               <div
+//                 key={item.label}
+//                 className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-white/5 flex-col gap-3"
+//               >
+//                 <div className="flex w-full justify-between">
+//                   <div className="flex items-center gap-2 text-xs font-bold text-gray-300 mr-6">
+//                     <item.icon size={14} className="text-gray-500" />{" "}
+//                     {item.label}
+//                   </div>
+
+//                   <button
+//                     onClick={() => item.set(!item.val)}
+//                     className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ml-6 ${
+//                       item.val
+//                         ? "bg-amber-500 border-amber-500"
+//                         : "border-gray-600 bg-transparent"
+//                     }`}
+//                   >
+//                     {item.val && (
+//                       <Check size={10} className="text-black" strokeWidth={4} />
+//                     )}
+//                   </button>
+//                 </div>
+
+//                 {showTarget && (
+//                   <div className="pb-3 animate-in slide-in-from-top-2 w-full border-t border-white/10">
+//                     {/* Target widget scale slider */}
+//                     <div className="pt-2">
+//                       <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+//                         <span>Scale</span>
+//                         <span className="text-[9px]">
+//                           {targetScale.toFixed(1)}x
+//                         </span>
+//                       </div>
+//                       <input
+//                         type="range"
+//                         min={0.3}
+//                         max={2.0}
+//                         step={0.1}
+//                         value={targetScale}
+//                         onChange={(e) => setTargetScale(Number(e.target.value))}
+//                         className="w-full h-1 bg-zinc-800 rounded-lg accent-amber-500 mt-1"
+//                       />
+//                     </div>
+//                   </div>
+//                 )}
+//               </div>
+//             ))}
 
 //             <div className="bg-zinc-900/50 rounded-lg border border-white/5 overflow-hidden">
 //               <div
@@ -1445,19 +1505,40 @@
 //                 </div>
 //               </div>
 //               {showDistance && (
-//                 <div className="px-3 pb-3 flex gap-2 animate-in slide-in-from-top-2">
-//                   <input
-//                     value={yardage}
-//                     onChange={(e) => setYardage(e.target.value)}
-//                     className="bg-black border border-white/20 rounded px-2 py-1.5 text-xs text-white flex-1"
-//                     placeholder="Distance"
-//                   />
-//                   <button
-//                     onClick={() => setUnit(unit === "yd" ? "m" : "yd")}
-//                     className="bg-zinc-800 px-2 py-1 rounded text-[10px] font-bold border border-white/20 w-10"
-//                   >
-//                     {unit}
-//                   </button>
+//                 <div className="px-3 pb-3 flex gap-2 animate-in slide-in-from-top-2 align-center justify-center">
+//                   <div className="flex gap-2 items-end mr-2">
+//                     <input
+//                       value={yardage}
+//                       onChange={(e) => setYardage(e.target.value)}
+//                       className="bg-black border border-white/20 rounded px-2 py-1.5 text-xs text-white w-16 h-8"
+//                       placeholder="Distance"
+//                     />
+//                     <button
+//                       onClick={() => setUnit(unit === "yd" ? "m" : "yd")}
+//                       className="bg-zinc-800 px-2 py-1 rounded text-[10px] font-bold border border-white/20 w-10 h-8"
+//                     >
+//                       {unit}
+//                     </button>
+//                   </div>
+
+//                   {/* Distance widget scale slider */}
+//                   <div className="pt-2 border-t border-white/10">
+//                     <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+//                       <span>Scale</span>
+//                       <span className="text-[9px]">
+//                         {distanceScale.toFixed(1)}x
+//                       </span>
+//                     </div>
+//                     <input
+//                       type="range"
+//                       min={0.5}
+//                       max={1.5}
+//                       step={0.1}
+//                       value={distanceScale}
+//                       onChange={(e) => setDistanceScale(Number(e.target.value))}
+//                       className="w-full h-1 bg-zinc-800 rounded-lg accent-amber-500 mt-1"
+//                     />
+//                   </div>
 //                 </div>
 //               )}
 //             </div>
@@ -1518,7 +1599,7 @@
 //                   </div>
 
 //                   <div className="pt-2 border-t border-white/10">
-//                     <div className="flex justify-between items-center mb-2">
+//                     <div className="flex justify-between items-center mb-4">
 //                       <div className="flex items-center gap-2 text-xs font-bold text-gray-300">
 //                         <UserRoundPen size={14} className="text-gray-500" />{" "}
 //                         Player Info
@@ -1585,17 +1666,29 @@
 //                       </div>
 //                     )}
 //                   </div>
+
+//                   <div className="pt-2 border-t border-white/10">
+//                     <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+//                       <span>Scale</span>
+//                       <span className="text-[9px]">
+//                         {holeInfoScale.toFixed(1)}x
+//                       </span>
+//                     </div>
+//                     <input
+//                       type="range"
+//                       min={0.5}
+//                       max={1.5}
+//                       step={0.1}
+//                       value={holeInfoScale}
+//                       onChange={(e) => setHoleInfoScale(Number(e.target.value))}
+//                       className="w-full h-1 bg-zinc-800 rounded-lg accent-amber-500 mt-1"
+//                     />
+//                   </div>
 //                 </div>
 //               )}
 //             </div>
 
 //             {[
-//               {
-//                 label: "Target",
-//                 icon: Target,
-//                 val: showTarget,
-//                 set: setShowTarget,
-//               },
 //               {
 //                 label: "Shadow",
 //                 icon: MousePointer2,
@@ -1605,23 +1698,27 @@
 //             ].map((item) => (
 //               <div
 //                 key={item.label}
-//                 className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-white/5"
+//                 className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-white/5 flex-col gap-3"
 //               >
-//                 <div className="flex items-center gap-2 text-xs font-bold text-gray-300">
-//                   <item.icon size={14} className="text-gray-500" /> {item.label}
+//                 <div className="flex w-full justify-between">
+//                   <div className="flex items-center gap-2 text-xs font-bold text-gray-300 mr-6">
+//                     <item.icon size={14} className="text-gray-500" />{" "}
+//                     {item.label}
+//                   </div>
+
+//                   <button
+//                     onClick={() => item.set(!item.val)}
+//                     className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ml-6 ${
+//                       item.val
+//                         ? "bg-amber-500 border-amber-500"
+//                         : "border-gray-600 bg-transparent"
+//                     }`}
+//                   >
+//                     {item.val && (
+//                       <Check size={10} className="text-black" strokeWidth={4} />
+//                     )}
+//                   </button>
 //                 </div>
-//                 <button
-//                   onClick={() => item.set(!item.val)}
-//                   className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-//                     item.val
-//                       ? "bg-amber-500 border-amber-500"
-//                       : "border-gray-600 bg-transparent"
-//                   }`}
-//                 >
-//                   {item.val && (
-//                     <Check size={10} className="text-black" strokeWidth={4} />
-//                   )}
-//                 </button>
 //               </div>
 //             ))}
 //           </div>
@@ -1676,9 +1773,11 @@ import {
   UserRoundPen,
   Hash,
   Trophy,
+  AlertCircle,
+  X,
 } from "lucide-react";
-import TargetImg from "../assets/target.png"; // Ensure this path is correct
-import LogoImg from "../assets/logo.png"; // Assuming you have a logo here
+import TargetImg from "../assets/target.png";
+import LogoImg from "../assets/logo.png";
 
 // --- MATH & GEOMETRY ENGINE ---
 
@@ -1688,22 +1787,14 @@ const getRollerCoasterPoint = (
   p1: { x: number; y: number },
   t: number
 ) => {
-  // Calculate the CENTER between p0 and p1
   const centerX = (p0.x + p1.x) / 2;
-
-  // Calculate how far left/right the user moved from center
   const xOffset = c.x - centerX;
-
-  // Calculate the 85% point from the ORIGINAL p0 and p1 (not shifted)
   const apexX = p0.x + (p1.x - p0.x) * 0.85;
-
-  // Apply the user's left/right adjustment to the apex
   const adjustedApexX = apexX + xOffset;
 
-  // Use this as the control point X, keeping the same curve shape
   const forcedControl = {
-    x: adjustedApexX, // Apex at 85% + user's left/right adjustment
-    y: c.y - 300, // Same height adjustment
+    x: adjustedApexX,
+    y: c.y - 300,
   };
 
   const u = 1 - t;
@@ -1721,7 +1812,6 @@ const sampleRollerCoaster = (P0: any, C: any, P1: any, N = 200) => {
   return pts;
 };
 
-// Exact Shadow Projection from React Native code
 const projectSubsetToGroundUsingGlobal = (
   subsetPts: { x: number; y: number }[],
   startIndexInFull: number,
@@ -1735,7 +1825,6 @@ const projectSubsetToGroundUsingGlobal = (
   for (let i = 0; i < subsetPts.length; i++) {
     const globalIdx = startIndexInFull + i;
     const tGlobal = globalIdx / fullCount;
-    // Ground line linear interpolation based on global index progress
     const y = y0 + (y1 - y0) * tGlobal;
     out[i] = { x: subsetPts[i].x, y };
   }
@@ -1767,7 +1856,6 @@ const buildTaperedRibbonPath = (pts: any[], w0: number, w1: number) => {
     const ny = tx / tl;
 
     const t = lens[i] / totalLen;
-    // Linear width interpolation
     const w = w0 + (w1 - w0) * t;
     const hx = w * 0.5 * nx;
     const hy = w * 0.5 * ny;
@@ -1883,13 +1971,10 @@ const PlayerInfoGraphic = ({
   holeData: { num: string; par: string; dist: string };
   unit: string;
 }) => {
-  // Logic for shot counter
   const par = parseInt(holeData.par) || 4;
   const currentShot = parseInt(data.shot) || 1;
-  const maxSlots = par; // "Never be more numbers than hole par"
+  const maxSlots = par;
 
-  // Calculate window
-  // If shot is 6 on par 4, we want [3, 4, 5, 6]
   let endNum = Math.max(par, currentShot);
   let startNum = endNum - maxSlots + 1;
 
@@ -1901,10 +1986,8 @@ const PlayerInfoGraphic = ({
       style={{ boxShadow: "0px 2px 2px 0px rgba(0,0,0,.6)" }}
       className="flex flex-col w-[280px] rounded-lg overflow-hidden border border-white/20 font-sans"
     >
-      {/* Upper Section */}
       <div className="bg-[#165B94] h-[45px] flex items-center px-3 justify-between relative">
         <div className="flex items-center gap-3">
-          {/* Logo Placeholder */}
           <div className="w-8 h-8 rounded-md flex items-center justify-center">
             <img
               src={LogoImg}
@@ -1921,10 +2004,8 @@ const PlayerInfoGraphic = ({
         </div>
       </div>
 
-      {/* Divider */}
       <div className="h-[2px] bg-amber-500 w-full" />
 
-      {/* Lower Section */}
       <div className="bg-white h-[35px] flex items-center px-4 justify-between">
         <div className="flex items-center gap-4">
           <span className="text-black font-black text-xl mb-1">
@@ -1936,7 +2017,6 @@ const PlayerInfoGraphic = ({
           </span>
         </div>
 
-        {/* Shot Counter */}
         <div className="flex items-center gap-1.5">
           {shots.map((num) => (
             <div
@@ -1965,7 +2045,10 @@ export default function ShotTracerWeb() {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [videoDims, setVideoDims] = useState({ w: 0, h: 0 });
   const [isDragOver, setIsDragOver] = useState(false);
+
+  // Export State
   const [isExporting, setIsExporting] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
 
   // Playback
@@ -2014,7 +2097,7 @@ export default function ShotTracerWeb() {
   const [showTarget, setShowTarget] = useState(false);
   const [showDistance, setShowDistance] = useState(true);
   const [showHoleInfo, setShowHoleInfo] = useState(false);
-  const [showPlayerInfo, setShowPlayerInfo] = useState(false); // Toggle between basic hole info and Pro TV
+  const [showPlayerInfo, setShowPlayerInfo] = useState(false);
 
   // Data
   const [yardage, setYardage] = useState("150");
@@ -2026,102 +2109,155 @@ export default function ShotTracerWeb() {
     shot: "1",
   });
 
-  // --- EXPORT LOGIC ---
-  // const handleExport = async () => {
-  //   if (!videoRef.current || !containerRef.current) return;
-  //   setIsExporting(true);
-  //   setPlaying(false);
-  //   setExportProgress(0);
+  // --- NEW EXPORT LOGIC (SCREEN RECORDING) ---
 
-  //   const video = videoRef.current;
-  //   const originalTime = video.currentTime;
+  const startScreenRecording = async () => {
+    if (!videoRef.current || !containerRef.current) return;
 
-  //   try {
-  //     // 1. Setup Canvas
-  //     const canvas = document.createElement("canvas");
-  //     const ctx = canvas.getContext("2d");
-  //     if (!ctx) throw new Error("No Context");
+    setShowExportModal(false);
+    setIsExporting(true);
+    setPlaying(false);
 
-  //     canvas.width = video.videoWidth;
-  //     canvas.height = video.videoHeight;
+    // 1. Temporarily remove border radius for clean recording
+    const originalBorderRadius = containerRef.current.style.borderRadius;
+    containerRef.current.style.borderRadius = "0px";
 
-  //     // 2. Setup Recorder
-  //     const stream = canvas.captureStream(30); // 30 FPS
-  //     const recorder = new MediaRecorder(stream, {
-  //       mimeType: "video/webm; codecs=vp9",
-  //     });
-  //     const chunks: Blob[] = [];
+    // Store original time to restore later
+    const originalTime = videoRef.current.currentTime;
+    videoRef.current.currentTime = 0;
 
-  //     recorder.ondataavailable = (e) => {
-  //       if (e.data.size > 0) chunks.push(e.data);
-  //     };
-  //     recorder.onstop = () => {
-  //       const blob = new Blob(chunks, { type: "video/webm" });
-  //       const url = URL.createObjectURL(blob);
-  //       const a = document.createElement("a");
-  //       a.href = url;
-  //       a.download = `MaxBogey_Tracer_${Date.now()}.webm`;
-  //       a.click();
+    try {
+      // 2. Start Capture
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { displaySurface: "browser" },
+        audio: false,
+      });
 
-  //       // Cleanup
-  //       setIsExporting(false);
-  //       video.currentTime = originalTime;
-  //     };
+      // 3. Setup Recorder Canvas (for Cropping)
+      // We need to crop the stream to ONLY the video container
+      const track = stream.getVideoTracks()[0];
+      const captureStream = new MediaStream([track]);
 
-  //     recorder.start();
-  //     video.currentTime = 0;
+      // Temporary video element to read the stream
+      const videoReader = document.createElement("video");
+      videoReader.srcObject = captureStream;
+      videoReader.muted = true;
+      videoReader.play();
 
-  //     // 3. Frame Loop
-  //     const processFrame = () => {
-  //       if (!video || video.ended || video.currentTime >= duration) {
-  //         recorder.stop();
-  //         return;
-  //       }
+      // Canvas to record
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
 
-  //       // Draw Video
-  //       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Get dimensions of the container we want to record
+      const rect = containerRef.current.getBoundingClientRect();
+      // Set canvas to match the container size
+      canvas.width = rect.width;
+      canvas.height = rect.height;
 
-  //       // Draw Overlays manually (Simple Approach: Serialize SVG)
-  //       // Note: For perfect sync, we might need to recreate geometry on canvas context
-  //       // But serializing the SVG container over the video is the standard web hack.
-  //       if (svgRef.current) {
-  //         const xml = new XMLSerializer().serializeToString(svgRef.current);
-  //         const svg64 = btoa(unescape(encodeURIComponent(xml)));
-  //         const b64Start = "data:image/svg+xml;base64,";
-  //         const image64 = b64Start + svg64;
+      const recorder = new MediaRecorder(canvas.captureStream(60), {
+        mimeType: "video/webm; codecs=vp9",
+        videoBitsPerSecond: 5000000, // 5 Mbps for high quality
+      });
 
-  //         const img = new Image();
-  //         img.src = image64;
-  //         img.onload = () => {
-  //           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const chunks: Blob[] = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
 
-  //           // Advance Video
-  //           const step = 1 / 30;
-  //           video.currentTime += step;
-  //           setCurrentTime(video.currentTime);
-  //           setExportProgress(Math.round((video.currentTime / duration) * 100));
+      recorder.onstop = () => {
+        // Stop all tracks
+        track.stop();
 
-  //           // Recursive loop
-  //           requestAnimationFrame(processFrame);
-  //         };
-  //       } else {
-  //         // Fallback if no SVG ref
-  //         video.currentTime += 1 / 30;
-  //         requestAnimationFrame(processFrame);
-  //       }
-  //     };
+        // Download
+        const blob = new Blob(chunks, { type: "video/webm" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `MaxBogey_Tracer_${Date.now()}.webm`;
+        a.click();
 
-  //     // Start the loop
-  //     processFrame();
-  //   } catch (e) {
-  //     console.error(e);
-  //     setIsExporting(false);
-  //     alert("Export failed. Please try a shorter video or different browser.");
-  //   }
-  // };
+        // Cleanup
+        setIsExporting(false);
+        containerRef.current!.style.borderRadius = originalBorderRadius;
+        videoRef.current!.currentTime = originalTime;
+      };
 
-  const handleExport = () => {
-    console.log("EXPORT VIDEO");
+      // 4. Start Recording Loop
+      recorder.start();
+
+      // Start main video playback
+      videoRef.current.play();
+      setPlaying(true);
+
+      const drawFrame = () => {
+        if (!isExporting && recorder.state === "inactive") return;
+
+        // Check if video finished
+        if (videoRef.current && videoRef.current.ended) {
+          recorder.stop();
+          setPlaying(false);
+          return;
+        }
+
+        if (videoReader.readyState >= 2 && ctx) {
+          // CROP LOGIC:
+          // Calculate scale between stream resolution and window resolution
+          // getDisplayMedia often returns retina resolution (2x) or screen resolution
+
+          // We assume the user selected "THIS TAB" so coordinates are relative to viewport usually
+          // If they selected "Entire Screen", coordinates might be off, but we can't detect that easily.
+
+          const streamW = videoReader.videoWidth;
+          const winW = window.innerWidth;
+
+          // Approximate scale factor (handling retina displays etc)
+          // If sharing 'Tab', the stream width usually matches window.innerWidth * devicePixelRatio
+          // But sometimes it matches the content width.
+          // Safest bet for 'This Tab' is calculating the ratio:
+          const scaleX = streamW / winW;
+          // Vertical scale might be different if tabs/url bar are excluded in stream but present in window innerHeight
+          // Actually for 'Tab Sharing', the stream usually excludes browser UI, so it matches window.innerHeight roughly.
+          const streamH = videoReader.videoHeight;
+          const winH = window.innerHeight;
+          const scaleY = streamH / winH;
+
+          // Source coordinates (The container on screen)
+          const sx = (rect.left + window.scrollX) * scaleX;
+          const sy = (rect.top + window.scrollY) * scaleY;
+          const sWidth = rect.width * scaleX;
+          const sHeight = rect.height * scaleY;
+
+          // Draw cropped region to canvas
+          ctx.drawImage(
+            videoReader,
+            sx,
+            sy,
+            sWidth,
+            sHeight,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+        }
+
+        // Update Progress UI
+        if (videoRef.current) {
+          setExportProgress(
+            Math.round((videoRef.current.currentTime / duration) * 100)
+          );
+        }
+
+        requestAnimationFrame(drawFrame);
+      };
+
+      drawFrame();
+    } catch (err) {
+      console.error("Recording error:", err);
+      setIsExporting(false);
+      containerRef.current.style.borderRadius = originalBorderRadius;
+      alert("Recording failed or cancelled.");
+    }
   };
 
   // --- DRAG LOGIC ---
@@ -2361,19 +2497,12 @@ export default function ShotTracerWeb() {
 
     const isLanded = currentTime > landingPoint.time;
 
-    // --------------------------------------------------
-    // COMET + HYBRID (FRACTIONAL, SMOOTH TAIL SHRINK)
-    // --------------------------------------------------
-
+    // COMET + HYBRID
     if (tracerMode === "comet" || tracerMode === "hybrid") {
       const cutStart =
         tracerMode === "comet" ? Math.floor(N * 0.3) : Math.floor(N * 0.6);
 
-      // 🔑 DIFFERENCE BETWEEN MODES
-      const maxTailEat =
-        tracerMode === "comet"
-          ? N * 0.875 // SLOWER SHRINK (FIX)
-          : N * 0.8; // PERFECT — DO NOT TOUCH
+      const maxTailEat = tracerMode === "comet" ? N * 0.875 : N * 0.8;
 
       if (endIdx > cutStart || isLanded) {
         let rawStartIdx = ((floatIdx - cutStart) / (N - cutStart)) * maxTailEat;
@@ -2391,7 +2520,7 @@ export default function ShotTracerWeb() {
 
         let slicedPts = visiblePts.slice(startIdxInt);
 
-        // Fractional tail interpolation (critical)
+        // Fractional tail interpolation
         if (slicedPts.length >= 2 && startFrac > 0) {
           const p0 = visiblePts[startIdxInt];
           const p1 = visiblePts[startIdxInt + 1];
@@ -2408,10 +2537,7 @@ export default function ShotTracerWeb() {
 
     if (visiblePts.length < 2) return null;
 
-    // --------------------------------------------------
     // PATH BUILDING
-    // --------------------------------------------------
-
     let dMain = "";
     let dShadow = "";
 
@@ -2568,16 +2694,68 @@ export default function ShotTracerWeb() {
       onPointerUp={onPointerUp}
       onPointerMove={onPointerMove}
     >
-      {/* Export Overlay */}
+      {/* EXPORT INSTRUCTION MODAL */}
+      {showExportModal && (
+        <div className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-zinc-900 border border-white/20 rounded-2xl p-8 max-w-md w-full shadow-2xl"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center text-amber-500">
+                <AlertCircle size={24} />
+              </div>
+              <h2 className="text-2xl font-bold text-white">
+                Recording Instructions
+              </h2>
+            </div>
+
+            <div className="space-y-4 text-gray-300 mb-8">
+              <p className="flex gap-3">
+                <span className="font-bold text-amber-500">1.</span>
+                <span>
+                  When prompted, select the <strong>"This Tab"</strong> option.
+                </span>
+              </p>
+              <p className="flex gap-3">
+                <span className="font-bold text-amber-500">2.</span>
+                <span>
+                  <strong>Important:</strong> Move your mouse cursor OFF the
+                  video area so it doesn't get recorded.
+                </span>
+              </p>
+              <p className="flex gap-3">
+                <span className="font-bold text-amber-500">3.</span>
+                <span>
+                  Do not scroll or resize the window during recording.
+                </span>
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={startScreenRecording}
+                className="flex-1 py-3 bg-amber-500 hover:bg-white hover:text-black text-black font-bold rounded-lg shadow-[0_0_15px_rgba(245,158,11,0.4)]"
+              >
+                I Understand, Start
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* RECORDING OVERLAY */}
       {isExporting && (
-        <div className="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center">
-          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Exporting Video...
-          </h2>
-          <p className="text-gray-400">
-            Rendering frame {Math.round(exportProgress)}%
-          </p>
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 z-[100] bg-red-600 text-white px-6 py-2 rounded-full shadow-lg flex items-center gap-3 animate-pulse">
+          <div className="w-3 h-3 bg-white rounded-full" />
+          <span className="font-bold">Recording... {exportProgress}%</span>
         </div>
       )}
 
@@ -2840,7 +3018,10 @@ export default function ShotTracerWeb() {
         <div className="h-24 bg-black border-t border-white/10 px-4 md:px-8 flex items-center gap-6 z-20 shrink-0">
           <button
             onClick={togglePlay}
-            className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-amber-500 hover:text-black transition-colors shrink-0"
+            disabled={isExporting}
+            className={`w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center hover:bg-amber-500 hover:text-black transition-colors shrink-0 ${
+              isExporting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             {playing ? (
               <Pause fill="currentColor" size={20} />
@@ -2851,13 +3032,15 @@ export default function ShotTracerWeb() {
           <div className="flex gap-2 shrink-0">
             <button
               onClick={() => skipFrame("back")}
-              className="p-2 hover:text-amber-500 text-gray-400"
+              disabled={isExporting}
+              className="p-2 hover:text-amber-500 text-gray-400 disabled:opacity-50"
             >
               <ChevronLeft size={24} />
             </button>
             <button
               onClick={() => skipFrame("fwd")}
-              className="p-2 hover:text-amber-500 text-gray-400"
+              disabled={isExporting}
+              className="p-2 hover:text-amber-500 text-gray-400 disabled:opacity-50"
             >
               <ChevronRight size={24} />
             </button>
@@ -2869,6 +3052,7 @@ export default function ShotTracerWeb() {
               max={duration || 100}
               step={0.01}
               value={currentTime}
+              disabled={isExporting}
               onChange={(e) => {
                 const t = parseFloat(e.target.value);
                 setCurrentTime(t);
@@ -2890,15 +3074,15 @@ export default function ShotTracerWeb() {
                   skipFrame("fwd");
                 }
               }}
-              className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500 hover:accent-amber-400"
+              className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500 hover:accent-amber-400 disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
         </div>
       </div>
 
       {/* RIGHT: TOOLS SIDEBAR */}
-      <div className="w-full lg:w-80 bg-[#0a0a0a] border-l border-white/10 flex flex-col h-[40vh] lg:h-screen overflow-y-scroll shrink-0">
-        <div className="p-5 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-10">
+      <div className="w-full lg:w-80 bg-[#0a0a0a] border-l border-white/10 flex flex-col h-[40vh] lg:h-screen overflow-y-scroll shrink-0 z-99">
+        <div className="p-5 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-999">
           <div className="flex items-center gap-2">
             <Link to="/">
               <button className="hover:bg-white/10 p-2 rounded transition-colors">
@@ -3375,12 +3559,12 @@ export default function ShotTracerWeb() {
           <div className="w-full h-px bg-white/5" />
 
           <button
-            onClick={handleExport}
+            onClick={() => setShowExportModal(true)}
             disabled={isExporting}
-            className="w-full bg-[#165B94] hover:bg-white hover:text-[#165B94] text-white font-bold py-3 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2"
+            className="w-full bg-[#165B94] hover:bg-white hover:text-[#165B94] text-white font-bold py-3 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isExporting ? (
-              "Processing..."
+              "Recording..."
             ) : (
               <>
                 <Download size={18} /> Export Video
