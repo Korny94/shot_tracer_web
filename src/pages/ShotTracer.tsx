@@ -163,7 +163,7 @@ const ControlNode = ({ x, y, color, label, onDragStart }: any) => (
       className="w-8 h-8 rounded-full border-2 border-white shadow-[0_2px_4px_rgba(0,0,0,0.5)] flex items-center justify-center transition-transform"
       style={{ backgroundColor: color }}
     >
-      <div className="w-0.75 h-0.75  bg-white rounded-full" />
+      {/* <div className="w-0.75 h-0.75  bg-white rounded-full" />  */}
     </div>
     <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black/90 text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/20 z-40">
       {label}
@@ -1360,12 +1360,12 @@ export default function ShotTracerWeb() {
           if (impactPoint && landingPoint) {
             // DON'T scale the points - use them directly like the SVG does
             const scImp = {
-              x: impactPoint.x,
-              y: impactPoint.y,
+              x: impactPoint.x + 0.8,
+              y: impactPoint.y + 2.5, // Move down a few pixels
             };
             const scLand = {
-              x: landingPoint.x,
-              y: landingPoint.y,
+              x: landingPoint.x + 0.7,
+              y: landingPoint.y + 1.5, // Move down a few pixels
             };
 
             const cpRaw = controlPoint || {
@@ -1424,7 +1424,7 @@ export default function ShotTracerWeb() {
                       rawStartIdx + (N - rawStartIdx) * shrinkFactor;
 
                     // Calculate fade opacity based on time since landing
-                    const fadeDuration = 1.2;
+                    const fadeDuration = 1.5;
                     fadeOpacity = Math.max(0, 1 - timeSinceLand / fadeDuration);
                     shadowFadeOpacity = fadeOpacity;
                   }
@@ -1456,6 +1456,7 @@ export default function ShotTracerWeb() {
 
               if (visiblePts.length > 1) {
                 // Width factor helper functions
+
                 const getTailWidthFactor = (mode, progress) => {
                   if (mode === "comet") {
                     if (progress <= 0.4) return 1.0;
@@ -1463,10 +1464,10 @@ export default function ShotTracerWeb() {
                       return 1.0 - ((progress - 0.4) / 0.2) * 0.2;
                     return 0.8;
                   } else {
-                    // hybrid
-                    if (progress <= 0.5) return 1.0;
+                    // hybrid - 0-60%: 100% width, 60-80%: smoothly reduces from 100% to 80% width, 80%+: 80% width
+                    if (progress <= 0.6) return 1.0;
                     if (progress <= 0.8)
-                      return 1.0 - ((progress - 0.5) / 0.3) * 0.2;
+                      return 1.0 - ((progress - 0.6) / 0.2) * 0.2;
                     return 0.8;
                   }
                 };
@@ -1478,12 +1479,10 @@ export default function ShotTracerWeb() {
                       return 1.0 - ((progress - 0.4) / 0.2) * 0.6;
                     return 0.4;
                   } else {
-                    // hybrid
-                    if (progress <= 0.5) return 1.0;
-                    if (progress <= 0.6)
-                      return 1.0 - ((progress - 0.5) / 0.1) * 0.5;
+                    // hybrid - 0-60%: 100% width, 60-80%: smoothly reduces from 100% to 40% width, 80%+: 40% width
+                    if (progress <= 0.6) return 1.0;
                     if (progress <= 0.8)
-                      return 0.5 - ((progress - 0.6) / 0.2) * 0.1;
+                      return 1.0 - ((progress - 0.6) / 0.2) * 0.6;
                     return 0.4;
                   }
                 };
@@ -1860,7 +1859,7 @@ export default function ShotTracerWeb() {
 
               // Divider
               const dividerY = hy + topHeight;
-              ctx.fillStyle = "#f59e0b";
+              ctx.fillStyle = "#fe9a00";
               ctx.fillRect(hx, dividerY, widgetWidth, dividerHeight);
 
               // ─── LOWER SECTION ─────────────────────
@@ -2408,7 +2407,7 @@ export default function ShotTracerWeb() {
 
           // Calculate fade opacity based on time since landing
           // Start fading immediately when head reaches end, finish before tail reaches end
-          const fadeDuration = 1.2; // seconds to fully fade out
+          const fadeDuration = 1.4; // seconds to fully fade out
           fadeOpacity = Math.max(0, 1 - timeSinceLand / fadeDuration);
           shadowFadeOpacity = fadeOpacity; // Shadow fades at same rate
         }
@@ -3176,7 +3175,7 @@ export default function ShotTracerWeb() {
               </div>
 
               {/* Preset colors */}
-              {["#ff0000", "#3b82f6", "#eab308", "#ffffff"].map((c) => (
+              {["#ff0000", "#3b82f6", "#fe9a00", "#ffffff"].map((c) => (
                 <button
                   key={c}
                   onClick={() => setTracerColor(c)}
