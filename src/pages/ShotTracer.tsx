@@ -232,7 +232,7 @@ const VirtualJoystick = ({
         <SiArchicad size={20} className="text-black" />
       </motion.div>
       <span className="absolute bottom-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest pointer-events-none">
-        Curve Adjust
+        Drag joystick
       </span>
     </div>
   );
@@ -2603,7 +2603,7 @@ export default function ShotTracerWeb() {
                     />
                     <button
                       onClick={() => setUnit(unit === "yd" ? "m" : "yd")}
-                      className="bg-[#165B94] px-2 py-1 rounded text-[10px] font-bold border border-white/20 w-10 h-8"
+                      className="bg-zinc-800 px-2 py-1 rounded text-[10px] font-bold border border-white/20 w-10 h-8"
                     >
                       {unit}
                     </button>
@@ -2681,7 +2681,7 @@ export default function ShotTracerWeb() {
                     />
                     <button
                       onClick={() => setUnit(unit === "yd" ? "m" : "yd")}
-                      className="bg-[#165B94] px-1 rounded text-[9px] font-bold border border-white/20 w-8"
+                      className="bg-zinc-800 px-1 rounded text-[9px] font-bold border border-white/20 w-8"
                     >
                       {unit}
                     </button>
