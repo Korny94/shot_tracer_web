@@ -29,7 +29,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { SiArchicad } from "react-icons/si";
-import { BsDisplay } from "react-icons/bs";
+import { BsDisplay, BsJoystick } from "react-icons/bs";
 import TargetImg from "../assets/target.png"; // Ensure this path is correct
 import LogoImg from "../assets/logo.png"; // Assuming you have a logo here
 
@@ -221,6 +221,10 @@ const VirtualJoystick = ({
         <div className="border-r border-white"></div>
         <div className=""></div>
       </div>
+      <span className="absolute top-4 text-[12px] text-white/75 font-bold uppercase tracking-widest pointer-events-none flex items-center gap-2">
+        {/* <BsJoystick size={14} className="text-amber-500" />  */}
+        Drag joystick
+      </span>
       <motion.div
         ref={stickRef}
         drag
@@ -229,11 +233,8 @@ const VirtualJoystick = ({
         onDrag={(_, info) => onMove(info.delta.x * 3, info.delta.y * 3)}
         className="w-12 h-12 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)] z-10 cursor-move active:cursor-grabbing flex items-center justify-center"
       >
-        <SiArchicad size={20} className="text-black" />
+        <BsJoystick size={20} className="text-black" />
       </motion.div>
-      <span className="absolute bottom-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest pointer-events-none">
-        Drag joystick
-      </span>
     </div>
   );
 };
@@ -1906,7 +1907,8 @@ export default function ShotTracerWeb() {
       >
         <Link to="/">
           <button className="absolute top-8 left-8 flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-            <Home size={24} /> <span className="font-bold">Home</span>
+            <Home size={24} className="text-amber-500" />{" "}
+            <span className="font-bold">Home</span>
           </button>
         </Link>
 
@@ -2339,7 +2341,7 @@ export default function ShotTracerWeb() {
           <div className="flex items-center gap-2">
             <Link to="/">
               <button className="hover:bg-white/10 p-2 rounded transition-colors">
-                <Home size={18} className="text-amber-500" />
+                <Home size={20} className="text-amber-500" />
               </button>
             </Link>
             <h2 className="text-base font-bold text-white tracking-wide">
@@ -2350,29 +2352,11 @@ export default function ShotTracerWeb() {
             onClick={() => setVideoSrc(null)}
             className="text-red-500 hover:bg-red-500/10 p-2 rounded-md transition-colors"
           >
-            <Trash2 size={16} />
+            <Trash2 size={18} />
           </button>
         </div>
 
         <div className="p-5 space-y-6">
-          {controlPoint && (
-            <div className="space-y-2">
-              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                <SiArchicad size={14} className="text-amber-500" /> Adjust Curve
-              </div>
-              <VirtualJoystick
-                onMove={(dx, dy) => {
-                  if (controlPoint) {
-                    setControlPoint({
-                      x: controlPoint.x + dx,
-                      y: controlPoint.y + dy,
-                    });
-                  }
-                }}
-              />
-            </div>
-          )}
-
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => {
@@ -2402,11 +2386,29 @@ export default function ShotTracerWeb() {
             </button>
           </div>
 
+          {controlPoint && (
+            <div className="space-y-2">
+              {/* <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                <SiArchicad size={14} className="text-amber-500" /> Adjust Curve
+              </div> */}
+              <VirtualJoystick
+                onMove={(dx, dy) => {
+                  if (controlPoint) {
+                    setControlPoint({
+                      x: controlPoint.x + dx,
+                      y: controlPoint.y + dy,
+                    });
+                  }
+                }}
+              />
+            </div>
+          )}
+
           <div className="w-full h-px bg-white/5" />
 
           <div className="space-y-4">
-            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-              <Settings2 size={14} className="text-amber-500" />
+            <div className="text-[12px] font-bold text-gray-500 uppercase tracking-widest flex items-center justify-center gap-4 mb-4">
+              <SiArchicad size={22} className="text-amber-500 mb-1" />
               <span> Tracer Style</span>
             </div>
             <div className="flex bg-zinc-900 rounded-lg p-1 border border-white/10">
@@ -2510,8 +2512,8 @@ export default function ShotTracerWeb() {
 
           {/* WIDGETS CONFIG */}
           <div className="space-y-6">
-            <div className="flex gap-2 items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-              <BsDisplay size={14} className="text-amber-500" />{" "}
+            <div className="flex gap-4 items-center justify-center text-[12px] font-bold text-gray-500 uppercase tracking-widest">
+              <BsDisplay size={22} className="text-amber-500" />{" "}
               <span>Graphics</span>
             </div>
             {[
