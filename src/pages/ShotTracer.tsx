@@ -29,6 +29,7 @@ import {
   Hash,
   Trophy,
 } from "lucide-react";
+import { SiArchicad } from "react-icons/si";
 import TargetImg from "../assets/target.png"; // Ensure this path is correct
 import LogoImg from "../assets/logo.png"; // Assuming you have a logo here
 
@@ -2338,7 +2339,7 @@ export default function ShotTracerWeb() {
           <div className="flex items-center gap-2">
             <Link to="/">
               <button className="hover:bg-white/10 p-2 rounded transition-colors">
-                <Home size={18} />
+                <Home size={18} className="text-amber-500" />
               </button>
             </Link>
             <h2 className="text-base font-bold text-white tracking-wide">
@@ -2404,9 +2405,9 @@ export default function ShotTracerWeb() {
           <div className="w-full h-px bg-white/5" />
 
           <div className="space-y-4">
-            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-              <Settings2 size={12} className="inline mr-1" />
-              Tracer Style
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+              <SiArchicad size={12} className="text-amber-500" />
+              <span> Tracer Style</span>
             </div>
             <div className="flex bg-zinc-900 rounded-lg p-1 border border-white/10">
               {["solid", "comet", "hybrid"].map((m) => (
@@ -2459,7 +2460,7 @@ export default function ShotTracerWeb() {
               </div>
 
               {/* Preset colors */}
-              {["#ff0000", "#3b82f6", "#fe9a00", "#ffffff"].map((c) => (
+              {["#ff0000", "#fe9a00", "#165B94", "#ffffff"].map((c) => (
                 <button
                   key={c}
                   onClick={() => setTracerColor(c)}
@@ -2526,7 +2527,7 @@ export default function ShotTracerWeb() {
               >
                 <div className="flex w-full justify-between">
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-300 mr-6">
-                    <item.icon size={14} className="text-gray-500" />{" "}
+                    <item.icon size={14} className="text-amber-500" />{" "}
                     {item.label}
                   </div>
 
@@ -2575,7 +2576,7 @@ export default function ShotTracerWeb() {
                 onClick={() => setShowDistance(!showDistance)}
               >
                 <div className="flex items-center gap-2 text-xs font-bold text-gray-300">
-                  <Ruler size={14} className="text-gray-500" /> Distance
+                  <Ruler size={14} className="text-amber-500" /> Distance
                 </div>
                 <div
                   className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
@@ -2600,7 +2601,7 @@ export default function ShotTracerWeb() {
                     />
                     <button
                       onClick={() => setUnit(unit === "yd" ? "m" : "yd")}
-                      className="bg-zinc-800 px-2 py-1 rounded text-[10px] font-bold border border-white/20 w-10 h-8"
+                      className="bg-[#165B94] px-2 py-1 rounded text-[10px] font-bold border border-white/20 w-10 h-8"
                     >
                       {unit}
                     </button>
@@ -2634,7 +2635,7 @@ export default function ShotTracerWeb() {
                 onClick={() => setShowHoleInfo(!showHoleInfo)}
               >
                 <div className="flex items-center gap-2 text-xs font-bold text-gray-300">
-                  <Info size={14} className="text-gray-500" /> Hole Info
+                  <Info size={14} className="text-amber-500" /> Hole Info
                 </div>
                 <div
                   className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
@@ -2677,7 +2678,7 @@ export default function ShotTracerWeb() {
                     />
                     <button
                       onClick={() => setUnit(unit === "yd" ? "m" : "yd")}
-                      className="bg-zinc-800 px-1 rounded text-[9px] font-bold border border-white/20 w-8"
+                      className="bg-[#165B94] px-1 rounded text-[9px] font-bold border border-white/20 w-8"
                     >
                       {unit}
                     </button>
@@ -2686,7 +2687,7 @@ export default function ShotTracerWeb() {
                   <div className="pt-2 border-t border-white/10">
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center gap-2 text-xs font-bold text-gray-300">
-                        <UserRoundPen size={14} className="text-gray-500" />{" "}
+                        <UserRoundPen size={14} className="text-amber-500" />{" "}
                         Player Info
                       </div>
                       <button
@@ -2787,7 +2788,7 @@ export default function ShotTracerWeb() {
               >
                 <div className="flex w-full justify-between">
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-300 mr-6">
-                    <item.icon size={14} className="text-gray-500" />{" "}
+                    <item.icon size={14} className="text-amber-500" />{" "}
                     {item.label}
                   </div>
 
@@ -2813,7 +2814,7 @@ export default function ShotTracerWeb() {
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="w-full bg-[#165B94] hover:bg-white hover:text-[#165B94] text-white font-bold py-3 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#165B94] bg-amber-500 hover:bg-white text-black font-bold py-3 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isExporting ? (
               "Rendering Video..."
