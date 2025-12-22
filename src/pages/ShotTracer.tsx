@@ -20,7 +20,6 @@ import {
   ChevronLeft,
   Check,
   MousePointer2,
-  Settings2,
   Home,
   Download,
   User,
@@ -28,6 +27,7 @@ import {
   Hash,
   Trophy,
 } from "lucide-react";
+import { CiPickerEmpty } from "react-icons/ci";
 import { SiArchicad } from "react-icons/si";
 import { BsDisplay, BsJoystick } from "react-icons/bs";
 import TargetImg from "../assets/target.png"; // Ensure this path is correct
@@ -222,7 +222,7 @@ const VirtualJoystick = ({
         <div className=""></div>
       </div>
       <span className="absolute top-4 text-[12px] text-white/75 font-bold uppercase tracking-widest pointer-events-none flex items-center gap-2">
-        {/* <BsJoystick size={14} className="text-amber-500" />  */}
+        <SiArchicad size={14} className="text-amber-500" />
         Drag joystick
       </span>
       <motion.div
@@ -256,8 +256,8 @@ const PlayerInfoGraphic = ({
 
   // Calculate window
   // If shot is 6 on par 4, we want [3, 4, 5, 6]
-  let endNum = Math.max(par, currentShot);
-  let startNum = endNum - maxSlots + 1;
+  const endNum = Math.max(par, currentShot);
+  const startNum = endNum - maxSlots + 1;
 
   const shots = [];
   for (let i = startNum; i <= endNum; i++) shots.push(i);
@@ -2407,8 +2407,8 @@ export default function ShotTracerWeb() {
           <div className="w-full h-px bg-white/5" />
 
           <div className="space-y-4">
-            <div className="text-[12px] font-bold text-gray-500 uppercase tracking-widest flex items-center justify-center gap-4 mb-4">
-              <SiArchicad size={22} className="text-amber-500 mb-1" />
+            <div className="text-[12px] font-bold text-gray-500 uppercase tracking-widest flex items-center justify-center gap-3 mb-4">
+              <CiPickerEmpty size={22} className="text-amber-500" />
               <span> Tracer Style</span>
             </div>
             <div className="flex bg-zinc-900 rounded-lg p-1 border border-white/10">
@@ -2528,14 +2528,21 @@ export default function ShotTracerWeb() {
                 key={item.label}
                 className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-white/5 flex-col gap-3"
               >
-                <div className="flex w-full justify-between">
+                <div
+                  className="flex w-full justify-between cursor-pointer"
+                  onClick={() => {
+                    if (!showTarget) {
+                      setCurrentTime(0);
+                    }
+                    item.set(!item.val);
+                  }}
+                >
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-300 mr-6">
                     <item.icon size={14} className="text-amber-500" />{" "}
                     <span style={{ marginTop: -1.1 }}>{item.label}</span>
                   </div>
 
                   <button
-                    onClick={() => item.set(!item.val)}
                     className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ml-6 ${
                       item.val
                         ? "bg-amber-500 border-amber-500"
@@ -2549,7 +2556,7 @@ export default function ShotTracerWeb() {
                 </div>
 
                 {showTarget && (
-                  <div className="pb-3 animate-in slide-in-from-top-2 w-full border-t border-white/10">
+                  <div className="pb-3 animate-in slide-in-from-top-2 w-full border-t border-white/10 ">
                     {/* Target widget scale slider */}
                     <div className="pt-2">
                       <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
@@ -2595,13 +2602,13 @@ export default function ShotTracerWeb() {
                 </div>
               </div>
               {showDistance && (
-                <div className="px-3 pb-3 flex gap-2 animate-in slide-in-from-top-2 align-center justify-center">
+                <div className="px-3 pb-3 flex gap-4 animate-in slide-in-from-top-2 align-center justify-center">
                   <div className="flex gap-2 items-end mr-2">
                     <input
                       value={yardage}
                       onChange={(e) => setYardage(e.target.value)}
-                      className="bg-black border border-white/20 rounded px-2 py-1.5 text-xs text-white w-16 h-8"
-                      placeholder="Distance"
+                      className="bg-black border border-white/20 rounded px-2 py-1.5 text-xs text-white w-12 h-8"
+                      placeholder="Dist"
                     />
                     <button
                       onClick={() => setUnit(unit === "yd" ? "m" : "yd")}
@@ -2612,7 +2619,7 @@ export default function ShotTracerWeb() {
                   </div>
 
                   {/* Distance widget scale slider */}
-                  <div className="pt-2 border-t border-white/10">
+                  <div className="pt-2">
                     <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                       <span>Size</span>
                       <span className="text-[9px]">
@@ -2690,7 +2697,7 @@ export default function ShotTracerWeb() {
                   </div>
 
                   <div className="pt-2 border-t border-white/10">
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-center mb-4 mt-2">
                       <div className="flex items-center gap-2 text-xs font-bold text-gray-300">
                         <UserRoundPen size={14} className="text-amber-500" />{" "}
                         Player Info
@@ -2789,7 +2796,8 @@ export default function ShotTracerWeb() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-white/5 flex-col gap-3"
+                className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-white/5 flex-col gap-3 cursor-pointer"
+                onClick={() => item.set(!item.val)}
               >
                 <div className="flex w-full justify-between">
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-300 mr-6">
@@ -2798,7 +2806,6 @@ export default function ShotTracerWeb() {
                   </div>
 
                   <button
-                    onClick={() => item.set(!item.val)}
                     className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ml-6 ${
                       item.val
                         ? "bg-amber-500 border-amber-500"
