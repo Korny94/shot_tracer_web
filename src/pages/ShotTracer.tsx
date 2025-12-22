@@ -16,12 +16,11 @@ import {
   Target,
   Ruler,
   Info,
-  Settings2,
   ChevronRight,
   ChevronLeft,
   Check,
   MousePointer2,
-  Gamepad2,
+  Settings2,
   Home,
   Download,
   User,
@@ -30,6 +29,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { SiArchicad } from "react-icons/si";
+import { BsDisplay } from "react-icons/bs";
 import TargetImg from "../assets/target.png"; // Ensure this path is correct
 import LogoImg from "../assets/logo.png"; // Assuming you have a logo here
 
@@ -229,7 +229,7 @@ const VirtualJoystick = ({
         onDrag={(_, info) => onMove(info.delta.x * 3, info.delta.y * 3)}
         className="w-12 h-12 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)] z-10 cursor-move active:cursor-grabbing flex items-center justify-center"
       >
-        <Gamepad2 size={20} className="text-black" />
+        <SiArchicad size={20} className="text-black" />
       </motion.div>
       <span className="absolute bottom-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest pointer-events-none">
         Curve Adjust
@@ -2358,7 +2358,7 @@ export default function ShotTracerWeb() {
           {controlPoint && (
             <div className="space-y-2">
               <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                <Gamepad2 size={12} /> Adjust Curve
+                <SiArchicad size={14} className="text-amber-500" /> Adjust Curve
               </div>
               <VirtualJoystick
                 onMove={(dx, dy) => {
@@ -2406,7 +2406,7 @@ export default function ShotTracerWeb() {
 
           <div className="space-y-4">
             <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-              <SiArchicad size={12} className="text-amber-500" />
+              <Settings2 size={14} className="text-amber-500" />
               <span> Tracer Style</span>
             </div>
             <div className="flex bg-zinc-900 rounded-lg p-1 border border-white/10">
@@ -2509,8 +2509,9 @@ export default function ShotTracerWeb() {
           <div className="w-full h-px bg-white/5" />
 
           {/* WIDGETS CONFIG */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+          <div className="space-y-6">
+            <div className="flex gap-2 items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+              <BsDisplay size={14} className="text-amber-500" />{" "}
               <span>Graphics</span>
             </div>
             {[
@@ -2528,7 +2529,7 @@ export default function ShotTracerWeb() {
                 <div className="flex w-full justify-between">
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-300 mr-6">
                     <item.icon size={14} className="text-amber-500" />{" "}
-                    {item.label}
+                    <span style={{ marginTop: -1.1 }}>{item.label}</span>
                   </div>
 
                   <button
@@ -2576,7 +2577,8 @@ export default function ShotTracerWeb() {
                 onClick={() => setShowDistance(!showDistance)}
               >
                 <div className="flex items-center gap-2 text-xs font-bold text-gray-300">
-                  <Ruler size={14} className="text-amber-500" /> Distance
+                  <Ruler size={14} className="text-amber-500" />{" "}
+                  <span style={{ marginTop: -1.1 }}>Distance</span>
                 </div>
                 <div
                   className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
@@ -2635,7 +2637,8 @@ export default function ShotTracerWeb() {
                 onClick={() => setShowHoleInfo(!showHoleInfo)}
               >
                 <div className="flex items-center gap-2 text-xs font-bold text-gray-300">
-                  <Info size={14} className="text-amber-500" /> Hole Info
+                  <Info size={14} className="text-amber-500" />{" "}
+                  <span style={{ marginTop: -1.1 }}>Hole Info</span>
                 </div>
                 <div
                   className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
@@ -2789,7 +2792,7 @@ export default function ShotTracerWeb() {
                 <div className="flex w-full justify-between">
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-300 mr-6">
                     <item.icon size={14} className="text-amber-500" />{" "}
-                    {item.label}
+                    <span style={{ marginTop: -1.1 }}>{item.label}</span>
                   </div>
 
                   <button
