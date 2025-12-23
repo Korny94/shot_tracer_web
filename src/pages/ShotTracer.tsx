@@ -223,7 +223,8 @@ const VirtualJoystick = ({
       </div>
       <span className="absolute top-4 text-[12px] text-white/75 font-bold uppercase tracking-widest pointer-events-none flex items-center gap-2">
         <SiArchicad size={14} className="text-amber-500" />
-        Drag joystick
+        {/* Drag joystick */}
+        Shot shape
       </span>
       <motion.div
         ref={stickRef}
@@ -392,7 +393,7 @@ export default function ShotTracerWeb() {
     "solid"
   );
   const [tracerColor, setTracerColor] = useState("#ff0000");
-  const [tracerOpacity, setTracerOpacity] = useState(0.7);
+  const [tracerOpacity, setTracerOpacity] = useState(0.8);
   const [tracerWidth, setTracerWidth] = useState(12);
   const [distanceScale, setDistanceScale] = useState(1.0);
   const [holeInfoScale, setHoleInfoScale] = useState(1.0);
