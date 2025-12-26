@@ -2932,6 +2932,7 @@ const sampleRollerCoaster = (P0: any, C: any, P1: any, N = 200) => {
 };
 
 // Exact Shadow Projection from React Native code
+
 const projectSubsetToGroundUsingGlobal = (
   subsetPts: { x: number; y: number }[],
   startIndexInFull: number,
@@ -2945,8 +2946,14 @@ const projectSubsetToGroundUsingGlobal = (
   for (let i = 0; i < subsetPts.length; i++) {
     const globalIdx = startIndexInFull + i;
     const tGlobal = globalIdx / fullCount;
-    // Ground line linear interpolation based on global index progress
-    const y = y0 + (y1 - y0) * tGlobal;
+
+    // Flip by using: flipped = 1 - (1 - t)^power
+    // This creates an ease-in curve (compressed at start, expanded at end)
+    const power = 1.9; // Adjust for desired curvature
+    const tFlipped = 1 - Math.pow(1 - tGlobal, power);
+
+    // Ground line with flipped curve interpolation based on global index progress
+    const y = y0 + (y1 - y0) * tFlipped;
     out[i] = { x: subsetPts[i].x, y };
   }
   return out;
@@ -3648,8 +3655,8 @@ export default function ShotTracerWeb() {
                   if (tracerMode === "solid") {
                     dShadow = buildTaperedRibbonPath(
                       groundPts,
-                      tracerWidth * pointScale * 0.65,
-                      tracerWidth * pointScale * 0.25
+                      tracerWidth * pointScale * 0.5,
+                      tracerWidth * pointScale * 0.2
                     );
                     const p = new Path2D(dShadow);
 
@@ -3661,9 +3668,9 @@ export default function ShotTracerWeb() {
                       groundPts[groundPts.length - 1].y
                     );
                     gradient.addColorStop(0, "rgba(0,0,0,0)");
-                    gradient.addColorStop(0.3, "rgba(0,0,0,0.2)");
-                    gradient.addColorStop(0.6, "rgba(0,0,0,0.25)");
-                    gradient.addColorStop(1, "rgba(0,0,0,0.25)");
+                    gradient.addColorStop(0.3, "rgba(0,0,0,0.1)");
+                    gradient.addColorStop(0.6, "rgba(0,0,0,0.15)");
+                    gradient.addColorStop(1, "rgba(0,0,0,0.2)");
 
                     ctx.fillStyle = gradient;
                     ctx.globalAlpha = globalOpacity;
@@ -3685,7 +3692,7 @@ export default function ShotTracerWeb() {
 
                     dShadow = buildTaperedRibbonPath(
                       groundPts,
-                      startWidth * 0.6,
+                      startWidth * 0.45,
                       endWidth * 0.2
                     );
                     const p = new Path2D(dShadow);
@@ -3703,7 +3710,7 @@ export default function ShotTracerWeb() {
                 if (tracerMode === "solid") {
                   dMain = buildTaperedRibbonPath(
                     scaledVisiblePts,
-                    tracerWidth * pointScale,
+                    tracerWidth * pointScale * 0.9,
                     tracerWidth * pointScale * 0.275
                   );
                   pMain = new Path2D(dMain);
@@ -3744,8 +3751,8 @@ export default function ShotTracerWeb() {
 
                   dMain = buildTaperedRibbonPath(
                     scaledVisiblePts,
-                    startWidth * 0.7,
-                    endWidth * 0.45
+                    startWidth * 0.6,
+                    endWidth * 0.35
                   );
                   pMain = new Path2D(dMain);
                   ctx.fillStyle = tracerColor;
@@ -4628,7 +4635,7 @@ export default function ShotTracerWeb() {
         );
         dShadow = buildTaperedRibbonPath(
           groundPts,
-          startWidth * 0.6,
+          startWidth * 0.45,
           endWidth * 0.2
         );
 
@@ -4646,7 +4653,7 @@ export default function ShotTracerWeb() {
       // SOLID
       dMain = buildTaperedRibbonPath(
         visiblePts,
-        tracerWidth,
+        tracerWidth * 0.9,
         tracerWidth * 0.275
       );
 
@@ -4660,8 +4667,8 @@ export default function ShotTracerWeb() {
         );
         dShadow = buildTaperedRibbonPath(
           groundPts,
-          tracerWidth * 0.65,
-          tracerWidth * 0.25
+          tracerWidth * 0.55,
+          tracerWidth * 0.2
         );
 
         // Create gradient vector for shadow fade
