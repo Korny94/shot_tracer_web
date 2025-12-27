@@ -4991,7 +4991,7 @@ export default function ShotTracerWeb() {
               onLoadedMetadata={onLoadedMetadata}
               className="w-full h-full object-contain pointer-events-none block"
               playsInline
-              muted
+              // muted
               crossOrigin="anonymous"
             />
 
@@ -5853,7 +5853,7 @@ export default function ShotTracerWeb() {
             </div>
 
             <div className="space-y-1 mt-2">
-              <div className="flex justify-between text-[10px] text-gray-400">
+              <div className="flex justify-between text-[12px] text-gray-400">
                 <span>Opacity</span>
                 <span>{Math.round(tracerOpacity * 100)}%</span>
               </div>
@@ -5868,7 +5868,7 @@ export default function ShotTracerWeb() {
               />
             </div>
             <div className="space-y-1">
-              <div className="flex justify-between text-[10px] text-gray-400">
+              <div className="flex justify-between text-[12px] text-gray-400">
                 <span>Width</span>
                 <span>{tracerWidth}px</span>
               </div>
