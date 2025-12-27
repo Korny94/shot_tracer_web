@@ -3392,7 +3392,7 @@ export default function ShotTracerWeb() {
     }
 
     // Check limit
-    if (favorites.length >= 8) {
+    if (favorites.length >= 10) {
       setColorModal({ type: "limit" });
       return;
     }
@@ -5607,7 +5607,7 @@ export default function ShotTracerWeb() {
                             <AlertCircle size={16} /> Limit Reached
                           </div>
                           <p className="text-xs text-gray-400 mb-3 leading-relaxed">
-                            You can only save 8 favorites. <br /> Remove one to
+                            You can only save 10 favorites. <br /> Remove one to
                             add this color.
                           </p>
                           <button
@@ -5646,8 +5646,8 @@ export default function ShotTracerWeb() {
                 )}
               </AnimatePresence>
 
-              <div className="flex items-center gap-4 mt-7">
-                {/* 1. COLOR WHEEL & ADD BUTTON */}
+              {/* <div className="flex items-center gap-4 mt-7">
+            
                 <div className="flex items-center gap-2 bg-zinc-900 p-1.5 rounded-full border border-white/10 pr-3">
                   <div className="relative w-8 h-8 rounded-full cursor-pointer hover:scale-105 transition-transform">
                     <input
@@ -5671,7 +5671,6 @@ export default function ShotTracerWeb() {
                     </div>
                   </div>
 
-                  {/* ADD BUTTON */}
                   <button
                     onClick={handleAddFavorite}
                     className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
@@ -5692,7 +5691,7 @@ export default function ShotTracerWeb() {
                   </button>
                 </div>
 
-                {/* 2. FAVORITES LIST */}
+        
                 <div className="flex flex-1 gap-2 flex-wrap">
                   <AnimatePresence>
                     {favorites.map((c) => (
@@ -5712,35 +5711,138 @@ export default function ShotTracerWeb() {
                           }`}
                           style={{ backgroundColor: c }}
                         />
-
-                        {/* DELETE BADGE (Only shows on ACTIVE color) */}
-                        {/* {tracerColor === c && (
-                          <motion.button
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            whileHover={{
-                              scale: 1.2,
-                              backgroundColor: "#ef4444",
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              confirmDeleteFavorite(c);
-                            }}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-transparent text-red-500 rounded-full flex items-center justify-center border border-zinc-900 cursor-pointer z-10 transition-colors"
-                          >
-                            <Trash2 size={14} strokeWidth={3} />
-                          </motion.button>
-                        )} */}
                       </motion.div>
                     ))}
                   </AnimatePresence>
 
-                  {/* Empty Slots Placeholders (Optional Visual Guide) */}
+    
                   {Array.from({
-                    length: Math.max(0, 6 - favorites.length),
+                    length: Math.max(0, 8 - favorites.length),
                   }).map((_, i) => (
                     <div
                       key={i}
+                      className="w-8 h-8 rounded-full border border-white/5 bg-white/5 flex items-center justify-center"
+                    >
+                      <div className="w-1 h-1 rounded-full bg-white/10" />
+                    </div>
+                  ))}
+                </div>
+              </div> */}
+              <div className="flex flex-col gap-2 mt-7">
+                {/* First row: Color wheel and first 4 favorites */}
+                <div className="flex w-full items-center gap-1 justify-evenly ml-1">
+                  {/* Color wheel and add button */}
+                  <div className="flex items-center gap-3 p-1.5 rounded-full mb-1">
+                    <div className="relative w-8 h-8 rounded-full cursor-pointer hover:scale-105 transition-transform">
+                      <input
+                        type="color"
+                        value={tracerColor}
+                        onChange={(e) => setTracerColor(e.target.value)}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      />
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center relative pointer-events-none overflow-hidden ring-1 ring-black/50">
+                        <div
+                          className="w-full h-full"
+                          style={{
+                            background:
+                              "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)",
+                          }}
+                        />
+                        <div
+                          className="absolute w-6 h-6 rounded-full border-4 border-black shadow-sm"
+                          style={{ backgroundColor: tracerColor }}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleAddFavorite}
+                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                        favorites.includes(tracerColor)
+                          ? "bg-transparent cursor-default"
+                          : "bg-amber-500 text-black hover:bg-white hover:scale-110"
+                      }`}
+                    >
+                      {favorites.includes(tracerColor) ? (
+                        <Trash2
+                          size={18}
+                          strokeWidth={3}
+                          className="text-amber-500"
+                        />
+                      ) : (
+                        <Plus size={16} strokeWidth={3} />
+                      )}
+                    </button>
+                  </div>
+
+                  {/* First row of favorites (next to color wheel) - max 4 */}
+                  <div className="flex w-full justify-evenly">
+                    <AnimatePresence>
+                      {favorites.slice(0, 4).map((c) => (
+                        <motion.div
+                          key={c}
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          className="relative group"
+                        >
+                          <button
+                            onClick={() => setTracerColor(c)}
+                            className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
+                              tracerColor === c
+                                ? "border-white border-3 scale-110"
+                                : "border-transparent hover:scale-105 hover:border-white hover:border-3"
+                            }`}
+                            style={{ backgroundColor: c }}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+
+                    {/* Empty slots for first row */}
+                    {Array.from({
+                      length: Math.max(0, 4 - Math.min(favorites.length, 4)),
+                    }).map((_, i) => (
+                      <div
+                        key={`empty-first-${i}`}
+                        className="w-8 h-8 rounded-full border border-white/5 bg-white/5 flex items-center justify-center"
+                      >
+                        <div className="w-1 h-1 rounded-full bg-white/10" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Second row: Remaining favorites (6 slots) - full width */}
+                <div className="flex gap-1 w-full justify-evenly">
+                  <AnimatePresence>
+                    {favorites.slice(4, 10).map((c) => (
+                      <motion.div
+                        key={c}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        className="relative group"
+                      >
+                        <button
+                          onClick={() => setTracerColor(c)}
+                          className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
+                            tracerColor === c
+                              ? "border-white border-3 scale-110"
+                              : "border-transparent hover:scale-105 hover:border-white hover:border-3"
+                          }`}
+                          style={{ backgroundColor: c }}
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+
+                  {/* Empty slots for second row - up to 6 */}
+                  {Array.from({
+                    length: Math.max(0, 6 - Math.max(favorites.length - 4, 0)),
+                  }).map((_, i) => (
+                    <div
+                      key={`empty-second-${i}`}
                       className="w-8 h-8 rounded-full border border-white/5 bg-white/5 flex items-center justify-center"
                     >
                       <div className="w-1 h-1 rounded-full bg-white/10" />
@@ -5783,7 +5885,6 @@ export default function ShotTracerWeb() {
 
           <div className="w-full h-px bg-white/5" />
 
-          {/* WIDGETS CONFIG */}
           <div className="space-y-6">
             <div className="flex gap-4 items-center justify-center text-[12px] font-bold text-gray-500 uppercase tracking-widest">
               <BsDisplay size={22} className="text-amber-500" />{" "}
@@ -5830,7 +5931,6 @@ export default function ShotTracerWeb() {
 
                 {showTarget && (
                   <div className="pb-3 animate-in slide-in-from-top-2 w-full border-t border-white/10 ">
-                    {/* Target widget scale slider */}
                     <div className="pt-2">
                       <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                         <span>Size</span>
@@ -5891,7 +5991,6 @@ export default function ShotTracerWeb() {
                     </button>
                   </div>
 
-                  {/* Distance widget scale slider */}
                   <div className="pt-2">
                     <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                       <span>Size</span>
