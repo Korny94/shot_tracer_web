@@ -2872,6 +2872,10 @@ import {
   Hash,
   Trophy,
   AlertTriangle,
+  Plus,
+  X as XIcon,
+  AlertCircle,
+  HeartPlus,
 } from "lucide-react";
 import { CiPickerEmpty } from "react-icons/ci";
 import { SiArchicad } from "react-icons/si";
@@ -3242,36 +3246,170 @@ export default function ShotTracerWeb() {
   const [placingMode, setPlacingMode] = useState<"impact" | "landing" | null>(
     null
   );
-  const [tracerMode, setTracerMode] = useState<"solid" | "comet" | "hybrid">(
-    "solid"
+  // const [tracerMode, setTracerMode] = useState<"solid" | "comet" | "hybrid">(
+  //   "solid"
+  // );
+  // const [tracerColor, setTracerColor] = useState("#ff0000");
+  // const [tracerOpacity, setTracerOpacity] = useState(0.8);
+  // const [tracerWidth, setTracerWidth] = useState(12);
+  // const [distanceScale, setDistanceScale] = useState(1.0);
+  // const [holeInfoScale, setHoleInfoScale] = useState(1.0);
+  // const [targetScale, setTargetScale] = useState(1.0);
+  // const [showShadow, setShowShadow] = useState(true);
+  // const [showTarget, setShowTarget] = useState(false);
+  // const [showDistance, setShowDistance] = useState(true);
+  // const [showHoleInfo, setShowHoleInfo] = useState(false);
+  // const [showPlayerInfo, setShowPlayerInfo] = useState(false); // Toggle between basic hole info and Pro TV
+
+  // // Data
+  // const [yardage, setYardage] = useState("150");
+  // const [unit, setUnit] = useState<"yd" | "m">("yd");
+  // const [holeData, setHoleData] = useState({ num: "1", par: "4", dist: "420" });
+  // const [playerData, setPlayerData] = useState({
+  //   name: "Tiger Woods",
+  //   score: "-2",
+  //   shot: "1",
+  // });
+
+  const loadState = (key, defaultValue) => {
+    const storedValue = localStorage.getItem(key);
+    return storedValue ? JSON.parse(storedValue) : defaultValue;
+  };
+
+  const [tracerMode, setTracerMode] = useState(() =>
+    loadState("tracerMode", "solid")
   );
-  const [tracerColor, setTracerColor] = useState("#ff0000");
-  const [tracerOpacity, setTracerOpacity] = useState(0.8);
-  const [tracerWidth, setTracerWidth] = useState(12);
-  const [distanceScale, setDistanceScale] = useState(1.0);
-  const [holeInfoScale, setHoleInfoScale] = useState(1.0);
-  const [targetScale, setTargetScale] = useState(1.0);
-  const [showShadow, setShowShadow] = useState(true);
-  const [showTarget, setShowTarget] = useState(false);
-  const [showDistance, setShowDistance] = useState(true);
-  const [showHoleInfo, setShowHoleInfo] = useState(false);
-  const [showPlayerInfo, setShowPlayerInfo] = useState(false); // Toggle between basic hole info and Pro TV
+  const [tracerColor, setTracerColor] = useState(() =>
+    loadState("tracerColor", "#ff0000")
+  );
+  const [favorites, setFavorites] = useState<string[]>(() =>
+    loadState("favorites", ["#ff0000", "#fe9a00", "#165B94", "#ffffff"])
+  );
+  const [tracerOpacity, setTracerOpacity] = useState(() =>
+    loadState("tracerOpacity", 0.8)
+  );
+  const [tracerWidth, setTracerWidth] = useState(() =>
+    loadState("tracerWidth", 12)
+  );
+  const [distanceScale, setDistanceScale] = useState(() =>
+    loadState("distanceScale", 1.0)
+  );
+  const [holeInfoScale, setHoleInfoScale] = useState(() =>
+    loadState("holeInfoScale", 1.0)
+  );
+  const [targetScale, setTargetScale] = useState(() =>
+    loadState("targetScale", 1.0)
+  );
+  const [showShadow, setShowShadow] = useState(() =>
+    loadState("showShadow", true)
+  );
+  const [showTarget, setShowTarget] = useState(() =>
+    loadState("showTarget", false)
+  );
+  const [showDistance, setShowDistance] = useState(() =>
+    loadState("showDistance", true)
+  );
+  const [showHoleInfo, setShowHoleInfo] = useState(() =>
+    loadState("showHoleInfo", false)
+  );
+  const [showPlayerInfo, setShowPlayerInfo] = useState(() =>
+    loadState("showPlayerInfo", false)
+  );
 
   // Data
-  const [yardage, setYardage] = useState("150");
-  const [unit, setUnit] = useState<"yd" | "m">("yd");
-  const [holeData, setHoleData] = useState({ num: "1", par: "4", dist: "420" });
-  const [playerData, setPlayerData] = useState({
-    name: "Tiger Woods",
-    score: "-2",
-    shot: "1",
-  });
+  const [yardage, setYardage] = useState(() => loadState("yardage", "150"));
+  const [unit, setUnit] = useState(() => loadState("unit", "yd"));
+  const [holeData, setHoleData] = useState(() =>
+    loadState("holeData", { num: "1", par: "4", dist: "420" })
+  );
+  const [playerData, setPlayerData] = useState(() =>
+    loadState("playerData", { name: "Tiger Woods", score: "-2", shot: "1" })
+  );
 
   const [showHomeModal, setShowHomeModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.setItem("tracerMode", JSON.stringify(tracerMode));
+    localStorage.setItem("tracerColor", JSON.stringify(tracerColor));
+    localStorage.setItem("tracerOpacity", JSON.stringify(tracerOpacity));
+    localStorage.setItem("tracerWidth", JSON.stringify(tracerWidth));
+    localStorage.setItem("distanceScale", JSON.stringify(distanceScale));
+    localStorage.setItem("holeInfoScale", JSON.stringify(holeInfoScale));
+    localStorage.setItem("targetScale", JSON.stringify(targetScale));
+    localStorage.setItem("showShadow", JSON.stringify(showShadow));
+    localStorage.setItem("showTarget", JSON.stringify(showTarget));
+    localStorage.setItem("showDistance", JSON.stringify(showDistance));
+    localStorage.setItem("showHoleInfo", JSON.stringify(showHoleInfo));
+    localStorage.setItem("showPlayerInfo", JSON.stringify(showPlayerInfo));
+    localStorage.setItem("yardage", JSON.stringify(yardage));
+    localStorage.setItem("unit", JSON.stringify(unit));
+    localStorage.setItem("holeData", JSON.stringify(holeData));
+    localStorage.setItem("playerData", JSON.stringify(playerData));
+  }, [
+    tracerMode,
+    tracerColor,
+    tracerOpacity,
+    tracerWidth,
+    distanceScale,
+    holeInfoScale,
+    targetScale,
+    showShadow,
+    showTarget,
+    showDistance,
+    showHoleInfo,
+    showPlayerInfo,
+    yardage,
+    unit,
+    holeData,
+    playerData,
+  ]);
+
+  // 'limit' = max reached, 'delete' = confirm removal
+  const [colorModal, setColorModal] = useState<{
+    type: "limit" | "delete" | null;
+    color?: string;
+  }>({ type: null });
+
+  // --- 2. UPDATE LOCAL STORAGE EFFECT ---
+  useEffect(() => {
+    // ... existing items
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }, [
+    // ... existing deps
+    favorites,
+  ]);
+
+  // --- 3. COLOR HANDLERS ---
+  const handleAddFavorite = () => {
+    // Check if already exists
+    if (favorites.includes(tracerColor)) {
+      confirmDeleteFavorite(tracerColor);
+      return;
+    }
+
+    // Check limit
+    if (favorites.length >= 8) {
+      setColorModal({ type: "limit" });
+      return;
+    }
+
+    setFavorites([...favorites, tracerColor]);
+  };
+
+  const confirmDeleteFavorite = (colorToDelete: string) => {
+    setColorModal({ type: "delete", color: colorToDelete });
+  };
+
+  const finalizeDelete = () => {
+    if (colorModal.color) {
+      setFavorites(favorites.filter((c) => c !== colorModal.color));
+      setColorModal({ type: null });
+    }
+  };
 
   // --- EXPORT LOGIC (CANVAS COMPOSITING) ---
 
@@ -4464,6 +4602,17 @@ export default function ShotTracerWeb() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [togglePlay, skipFrame]);
 
+  // Helper function to format time
+  // Helper function to format time with one decimal, showing minutes only if over 59 seconds
+  const formatTime = (timeInSeconds) => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = (timeInSeconds % 60).toFixed(1); // one decimal place
+    if (minutes > 0) {
+      return `${minutes}:${seconds.padStart(4, "0")}`; // Shows minutes and seconds
+    }
+    return `${seconds}`; // Shows only seconds if less than a minute
+  };
+
   const handleContainerClick = (e: React.MouseEvent) => {
     if (!placingMode || !containerRef.current || !videoRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -4766,9 +4915,9 @@ export default function ShotTracerWeb() {
         }}
       >
         <Link to="/">
-          <button className="absolute top-8 left-8 flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+          <button className="absolute top-8 left-8 flex items-center gap-2 text-white transition-colors">
             <Home size={24} className="text-amber-500" />{" "}
-            <span className="font-bold">Home</span>
+            <span className="font-bold text-xl">Home</span>
           </button>
         </Link>
 
@@ -4848,7 +4997,7 @@ export default function ShotTracerWeb() {
 
             {placingMode && !isExporting && (
               <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-amber-500 text-black font-bold px-6 py-2 rounded-full shadow-xl z-50 animate-pulse pointer-events-none border-2 border-white whitespace-nowrap">
-                Click to place {placingMode === "impact" ? "Start" : "End"}{" "}
+                Click to place {placingMode === "impact" ? "Impact" : "Landing"}{" "}
                 Point
               </div>
             )}
@@ -5192,6 +5341,9 @@ export default function ShotTracerWeb() {
               className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500 hover:accent-amber-400 disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
+          <div className="flex justify-between text-lg text-gray-300">
+            <span>{formatTime(currentTime)}</span>
+          </div>
         </div>
       </div>
 
@@ -5256,8 +5408,8 @@ export default function ShotTracerWeb() {
                 </div>
               )}
             </AnimatePresence>
-            <h2 className="text-base font-bold text-white tracking-wide">
-              Studio Tools
+            <h2 className="text-base font-bold text-white tracking-wide text-lg">
+              Shot Tracer Studio
             </h2>
           </div>
 
@@ -5382,7 +5534,8 @@ export default function ShotTracerWeb() {
               {["solid", "comet", "hybrid"].map((m) => (
                 <button
                   key={m}
-                  onClick={() => setTracerMode(m as any)}
+                  // onClick={() => setTracerMode(m as any)}
+                  onClick={() => setTracerMode(m)}
                   className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${
                     tracerMode === m
                       ? "bg-amber-500 text-black"
@@ -5394,10 +5547,8 @@ export default function ShotTracerWeb() {
               ))}
             </div>
 
-            <div className="flex items-center gap-2 mt-8 mb-8">
-              {/* Custom color (color wheel) */}
+            {/* <div className="flex items-center gap-2 mt-8 mb-8">
               <div className="relative w-7 h-7 rounded-full cursor-pointer">
-                {/* Color input MUST be on top */}
                 <input
                   type="color"
                   value={tracerColor}
@@ -5405,9 +5556,7 @@ export default function ShotTracerWeb() {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
 
-                {/* Visual layer */}
                 <div className="w-7 h-7 rounded-full flex items-center justify-center relative pointer-events-none">
-                  {/* Color wheel */}
                   <div
                     className="w-full h-full rounded-full"
                     style={{
@@ -5416,7 +5565,6 @@ export default function ShotTracerWeb() {
                     }}
                   />
 
-                  {/* Center dot */}
                   <div
                     className="absolute w-5 h-5 rounded-full border-4"
                     style={{
@@ -5428,7 +5576,6 @@ export default function ShotTracerWeb() {
                 </div>
               </div>
 
-              {/* Preset colors */}
               {["#ff0000", "#fe9a00", "#165B94", "#ffffff"].map((c) => (
                 <button
                   key={c}
@@ -5441,9 +5588,168 @@ export default function ShotTracerWeb() {
                   style={{ backgroundColor: c }}
                 />
               ))}
+            </div> */}
+
+            <div className="relative mb-8">
+              {/* MODAL OVERLAYS (AnimatePresence) */}
+              <AnimatePresence>
+                {colorModal.type && (
+                  <div className="absolute top-[-140px] left-0 w-full z-50 flex justify-center pointer-events-none">
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                      className="bg-zinc-900 border border-white/20 shadow-2xl rounded-xl p-4 w-[260px] pointer-events-auto"
+                    >
+                      {colorModal.type === "limit" ? (
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-2 text-amber-500 font-bold mb-2">
+                            <AlertCircle size={16} /> Limit Reached
+                          </div>
+                          <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+                            You can only save 8 favorites. <br /> Remove one to
+                            add this color.
+                          </p>
+                          <button
+                            onClick={() => setColorModal({ type: null })}
+                            className="w-full py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded text-xs font-bold text-white transition-colors"
+                          >
+                            Got it
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-2 text-red-500 font-bold mb-2">
+                            <Trash2 size={16} /> Remove Color?
+                          </div>
+                          <p className="text-xs text-gray-400 mb-3">
+                            Remove this color from your favorites?
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setColorModal({ type: null })}
+                              className="flex-1 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded text-xs font-bold text-white transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={finalizeDelete}
+                              className="flex-1 py-1.5 bg-red-600 hover:bg-red-500 rounded text-xs font-bold text-white transition-colors shadow-lg shadow-red-900/20"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>
+
+              <div className="flex items-center gap-4 mt-7">
+                {/* 1. COLOR WHEEL & ADD BUTTON */}
+                <div className="flex items-center gap-2 bg-zinc-900 p-1.5 rounded-full border border-white/10 pr-3">
+                  <div className="relative w-8 h-8 rounded-full cursor-pointer hover:scale-105 transition-transform">
+                    <input
+                      type="color"
+                      value={tracerColor}
+                      onChange={(e) => setTracerColor(e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center relative pointer-events-none overflow-hidden ring-1 ring-black/50">
+                      <div
+                        className="w-full h-full"
+                        style={{
+                          background:
+                            "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)",
+                        }}
+                      />
+                      <div
+                        className="absolute w-6 h-6 rounded-full border-4 border-black shadow-sm"
+                        style={{ backgroundColor: tracerColor }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ADD BUTTON */}
+                  <button
+                    onClick={handleAddFavorite}
+                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                      favorites.includes(tracerColor)
+                        ? "bg-zinc-800 text-gray-600 cursor-default"
+                        : "bg-amber-500 text-black hover:bg-white hover:scale-110"
+                    }`}
+                  >
+                    {favorites.includes(tracerColor) ? (
+                      <Trash2
+                        size={16}
+                        strokeWidth={3}
+                        className="text-red-500"
+                      />
+                    ) : (
+                      <Plus size={16} strokeWidth={3} />
+                    )}
+                  </button>
+                </div>
+
+                {/* 2. FAVORITES LIST */}
+                <div className="flex flex-1 gap-2 flex-wrap">
+                  <AnimatePresence>
+                    {favorites.map((c) => (
+                      <motion.div
+                        key={c}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        className="relative group"
+                      >
+                        <button
+                          onClick={() => setTracerColor(c)}
+                          className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
+                            tracerColor === c
+                              ? "border-white scale-110 ring-2 ring-white/20"
+                              : "border-transparent hover:scale-105 hover:border-white/50"
+                          }`}
+                          style={{ backgroundColor: c }}
+                        />
+
+                        {/* DELETE BADGE (Only shows on ACTIVE color) */}
+                        {/* {tracerColor === c && (
+                          <motion.button
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            whileHover={{
+                              scale: 1.2,
+                              backgroundColor: "#ef4444",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              confirmDeleteFavorite(c);
+                            }}
+                            className="absolute -top-2 -right-2 w-6 h-6 bg-transparent text-red-500 rounded-full flex items-center justify-center border border-zinc-900 cursor-pointer z-10 transition-colors"
+                          >
+                            <Trash2 size={14} strokeWidth={3} />
+                          </motion.button>
+                        )} */}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+
+                  {/* Empty Slots Placeholders (Optional Visual Guide) */}
+                  {Array.from({
+                    length: Math.max(0, 6 - favorites.length),
+                  }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-8 h-8 rounded-full border border-white/5 bg-white/5 flex items-center justify-center"
+                    >
+                      <div className="w-1 h-1 rounded-full bg-white/10" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Opacity & Width Sliders */}
             <div className="space-y-1 mt-2">
               <div className="flex justify-between text-[10px] text-gray-400">
                 <span>Opacity</span>
@@ -5768,7 +6074,10 @@ export default function ShotTracerWeb() {
               >
                 <div className="flex w-full justify-between">
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-300 mr-6">
-                    <item.icon size={14} className="text-amber-500" />{" "}
+                    {/* <item.icon size={14} className="text-amber-500" />{" "}
+                     */}
+                    <SiArchicad size={14} className="text-amber-500" />
+
                     <span style={{ marginTop: -1.1 }}>{item.label}</span>
                   </div>
 
