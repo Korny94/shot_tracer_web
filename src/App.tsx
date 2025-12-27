@@ -4,6 +4,8 @@ import Home from "./pages/Home";
 import ShotTracer from "./pages/ShotTracer";
 import AboutPage from "./pages/AboutPage";
 import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
+
 import ContactPage from "./pages/ContactPage";
 import FAQPage from "./pages/FAQPage";
 import Footer from "./components/Footer";
@@ -30,7 +32,7 @@ const App = () => {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/terms" element={<TermsPage />} />
-          <Route path="/privacy" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
         </Routes>
       </main>
 

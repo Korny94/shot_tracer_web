@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import Logo from "../assets/logo.png";
+// import Logo from "../assets/logo.png";
 
 // 2. Navigation
 const Navbar = () => {
@@ -44,7 +44,15 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               ))}
-              <button className="bg-amber-500 text-black px-5 py-2 rounded-full font-bold hover:bg-white transition-colors duration-300 shadow-[0_0_15px_rgba(245,158,11,0.5)]">
+              <button
+                onClick={() =>
+                  window.open(
+                    "https://play.google.com/store/apps/details?id=com.rbkorny.maxbogeyapp",
+                    "_blank"
+                  )
+                }
+                className="bg-amber-500 text-black px-5 py-2 rounded-full font-bold hover:bg-white transition-colors duration-300 shadow-[0_0_15px_rgba(245,158,11,0.5)]"
+              >
                 Download App
               </button>
             </div>

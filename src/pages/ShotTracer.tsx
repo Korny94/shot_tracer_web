@@ -2850,8 +2850,8 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
 import {
   Upload,
@@ -2871,6 +2871,7 @@ import {
   UserRoundPen,
   Hash,
   Trophy,
+  AlertTriangle,
 } from "lucide-react";
 import { CiPickerEmpty } from "react-icons/ci";
 import { SiArchicad } from "react-icons/si";
@@ -3266,6 +3267,12 @@ export default function ShotTracerWeb() {
     shot: "1",
   });
 
+  const [showHomeModal, setShowHomeModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  const navigate = useNavigate();
+
   // --- EXPORT LOGIC (CANVAS COMPOSITING) ---
 
   const handleExport = async () => {
@@ -3341,7 +3348,7 @@ export default function ShotTracerWeb() {
 
       // --- AUTO BITRATE & CODEC SELECTION ---
       const pixelCount = vidW * vidH;
-      const bitrate = Math.max(25_000_000, Math.round(pixelCount * 10));
+      const bitrate = Math.max(20_000_000, Math.round(pixelCount * 5));
 
       const preferredCodecs = ["avc1.640033", "avc1.4d002a", "avc1.42001e"];
       let chosenCodec = "avc1.640033";
@@ -5192,21 +5199,128 @@ export default function ShotTracerWeb() {
       <div className="w-full lg:w-80 bg-[#0a0a0a] border-l border-white/10 flex flex-col h-[40vh] lg:h-screen overflow-y-scroll shrink-0 z-99">
         <div className="p-5 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-999">
           <div className="flex items-center gap-2">
-            <Link to="/">
-              <button className="hover:bg-white/10 p-2 rounded transition-colors">
-                <Home size={20} className="text-amber-500" />
-              </button>
-            </Link>
+            <button
+              onClick={() => setShowHomeModal(true)}
+              className="hover:bg-white/10 p-2 rounded transition-colors"
+            >
+              <Home size={20} className="text-amber-500" />
+            </button>
+
+            <AnimatePresence>
+              {showHomeModal && (
+                <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                  {/* Click outside to close */}
+                  <div
+                    className="absolute inset-0"
+                    onClick={() => setShowHomeModal(false)}
+                  />
+
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.95, opacity: 0 }}
+                    className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+                  >
+                    {/* Glow Effect */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]" />
+
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mb-4 text-amber-500 border border-amber-500/20">
+                        <AlertTriangle size={24} />
+                      </div>
+
+                      <h3 className="text-xl font-bold text-white mb-2">
+                        Return to Home?
+                      </h3>
+                      <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                        Are you sure you want to leave the studio? Any unsaved
+                        progress on your tracer will be lost.
+                      </p>
+
+                      <div className="flex gap-3 w-full">
+                        <button
+                          onClick={() => setShowHomeModal(false)}
+                          className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => navigate("/")}
+                          className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-amber-500 text-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
+                        >
+                          Yes, Leave
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
             <h2 className="text-base font-bold text-white tracking-wide">
               Studio Tools
             </h2>
           </div>
+
           <button
-            onClick={() => setVideoSrc(null)}
+            onClick={() => setShowDeleteModal(true)}
             className="text-red-500 hover:bg-red-500/10 p-2 rounded-md transition-colors"
           >
             <Trash2 size={18} />
           </button>
+
+          <AnimatePresence>
+            {showDeleteModal && (
+              <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                {/* Click outside to close */}
+                <div
+                  className="absolute inset-0"
+                  onClick={() => setShowDeleteModal(false)}
+                />
+
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+                >
+                  {/* Glow Effect */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]" />
+
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4 text-red-500 border border-red-500/20">
+                      <Trash2 size={24} />
+                    </div>
+
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      Delete Video?
+                    </h3>
+                    <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                      Are you sure you want to delete this video? Any unsaved
+                      progress on your tracer will be lost.
+                    </p>
+
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={() => setShowDeleteModal(false)}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => {
+                          setVideoSrc(null);
+                          setShowDeleteModal(false);
+                        }}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-red-500 text-white hover:bg-red-400 transition-colors shadow-lg shadow-red-500/20"
+                      >
+                        Yes, Delete
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="p-5 space-y-6">
@@ -5222,7 +5336,7 @@ export default function ShotTracerWeb() {
                   : "bg-zinc-900 border-white/10 text-gray-300"
               }`}
             >
-              Set Start
+              Set Impact
             </button>
             <button
               onClick={() => {
@@ -5235,7 +5349,7 @@ export default function ShotTracerWeb() {
                   : "bg-zinc-900 border-white/10 text-gray-300"
               }`}
             >
-              Set End
+              Set Landing
             </button>
           </div>
 
@@ -5677,7 +5791,7 @@ export default function ShotTracerWeb() {
           <div className="w-full h-px bg-white/5" />
 
           <button
-            onClick={handleExport}
+            onClick={() => setShowExportModal(true)}
             disabled={isExporting}
             className="w-full bg-[#165B94] bg-amber-500 hover:bg-white text-black font-bold py-3 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -5689,6 +5803,59 @@ export default function ShotTracerWeb() {
               </>
             )}
           </button>
+
+          <AnimatePresence>
+            {showExportModal && (
+              <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                {/* Click outside to close */}
+                <div
+                  className="absolute inset-0"
+                  onClick={() => setShowExportModal(false)}
+                />
+
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+                >
+                  {/* Glow Effect */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]" />
+
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mb-4 text-amber-500 border border-amber-500/20">
+                      <Download size={24} />
+                    </div>
+
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      Export Video?
+                    </h3>
+                    <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                      Are you sure you want to export this video?
+                    </p>
+
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={() => setShowExportModal(false)}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleExport();
+                          setShowExportModal(false);
+                        }}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-amber-500 text-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+                      >
+                        <Download size={18} /> Yes, Export
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

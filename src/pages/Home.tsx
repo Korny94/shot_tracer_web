@@ -9,70 +9,272 @@ import {
   MessageCircle,
   Share2,
   Map,
+  Globe,
+  TriangleRight,
+  MapPinned,
+  Brain,
+  Ruler,
+  Flag,
+  Route,
+  LineChart,
+  Camera,
+  Scissors,
+  NotebookPen,
+  Dumbbell,
+  BarChart3,
+  PieChart,
+  Filter,
+  CircleDot,
+  Sigma,
+  Users,
+  Gauge,
+  Backpack,
+  Sliders,
+  UserCircle,
+  Share,
+  ImagePlus,
+  Bell,
+  Zap,
+  MessageSquare,
 } from "lucide-react";
+import { SiArchicad } from "react-icons/si";
+
+import ProcessingImg from "../assets/ProcessTracer2.jpg";
+
+// const features = [
+//   {
+//     id: 1,
+//     icon: Map,
+//     title: "Courses",
+//     description: "Explore over 42 000 golf courses worldwide.",
+//   },
+//   {
+//     id: 2,
+//     icon: Target,
+//     title: "Shot Tracer",
+//     description: "AI-powered shot tracing for your videos.",
+//   }, // Highlighted
+//   {
+//     id: 3,
+//     icon: BarChart2,
+//     title: "Scorecard with Map",
+//     description: "Visualize your game with interactive maps.",
+//   },
+//   {
+//     id: 4,
+//     icon: User,
+//     title: "Caddy Feature",
+//     description: "Get real-time advice and suggestions.",
+//   },
+//   {
+//     id: 5,
+//     icon: Target,
+//     title: "Measure Shot",
+//     description: "Accurately measure the distance of your shots.",
+//   },
+//   {
+//     id: 6,
+//     icon: Map,
+//     title: "Distance to Green",
+//     description: "Front, center and back green distances.",
+//   },
+//   {
+//     id: 7,
+//     icon: Video,
+//     title: "Video Analysis",
+//     description: "Record and analyze your swing.",
+//   },
+//   {
+//     id: 8,
+//     icon: Calendar,
+//     title: "Practice Log",
+//     description: "Log your practice sessions.",
+//   },
+//   {
+//     id: 9,
+//     icon: MessageCircle,
+//     title: "Messaging",
+//     description: "Chat with friends worldwide.",
+//   },
+//   {
+//     id: 10,
+//     icon: Share2,
+//     title: "Social Round",
+//     description: "View, like and comment on friends' rounds.",
+//   },
+//   // ... (In a real app, map the rest of your large array here)
+// ];
 
 const features = [
   {
     id: 1,
-    icon: Map,
-    title: "Courses",
-    description: "Explore over 42 000 golf courses worldwide.",
+    icon: Globe,
+    title: "Golf Courses",
+    description: "Access over 42,000 golf courses worldwide.",
   },
   {
     id: 2,
-    icon: Target,
+    icon: SiArchicad,
     title: "Shot Tracer",
-    description: "AI-powered shot tracing for your videos.",
-  }, // Highlighted
+    description: "Add TV-quality graphics & shot tracers to your golf videos.",
+  },
   {
     id: 3,
-    icon: BarChart2,
-    title: "Scorecard with Map",
-    description: "Visualize your game with interactive maps.",
+    icon: MapPinned,
+    title: "Smart Scorecard",
+    description: "Interactive scorecard with hole maps and key distances.",
   },
   {
     id: 4,
-    icon: User,
-    title: "Caddy Feature",
-    description: "Get real-time advice and suggestions.",
+    icon: Brain,
+    title: "Virtual Caddie",
+    description: "Receive real-time club recommendations on the course.",
   },
   {
     id: 5,
-    icon: Target,
-    title: "Measure Shot",
-    description: "Accurately measure the distance of your shots.",
+    icon: Ruler,
+    title: "Shot Distance",
+    description: "Measure shot distances with high accuracy.",
   },
   {
     id: 6,
-    icon: Map,
-    title: "Distance to Green",
-    description: "Front, center and back green distances.",
+    icon: Flag,
+    title: "Green Distances",
+    description: "View front, center, and back distances to the green.",
   },
   {
     id: 7,
-    icon: Video,
-    title: "Video Analysis",
-    description: "Record and analyze your swing.",
+    icon: Route,
+    title: "Course Mapping",
+    description: "See accurate distances to hazards and landing zones.",
   },
   {
     id: 8,
-    icon: Calendar,
-    title: "Practice Log",
-    description: "Log your practice sessions.",
+    icon: LineChart,
+    title: "Shot Tracking",
+    description: "Record shot data to build round statistics.",
   },
   {
     id: 9,
-    icon: MessageCircle,
-    title: "Messaging",
-    description: "Chat with friends worldwide.",
+    icon: Camera,
+    title: "Video Recording",
+    description: "Record your swing for detailed analysis.",
   },
   {
     id: 10,
-    icon: Share2,
-    title: "Social Round",
-    description: "View, like and comment on friends' rounds.",
+    icon: Scissors,
+    title: "Video Analysis",
+    description: "Analyze swings with slow motion and drawing tools.",
   },
-  // ... (In a real app, map the rest of your large array here)
+  {
+    id: 28,
+    icon: TriangleRight,
+    title: "Green Reading",
+    description: "Improve your putting with precise green and slope readings.",
+  },
+
+  {
+    id: 11,
+    icon: NotebookPen,
+    title: "Practice Log",
+    description: "Log and review your practice sessions.",
+  },
+  {
+    id: 12,
+    icon: Dumbbell,
+    title: "Practice Mode",
+    description: "Improve skills with focused practice and tracking.",
+  },
+  {
+    id: 13,
+    icon: BarChart3,
+    title: "Game Statistics",
+    description: "Analyze performance across all parts of your game.",
+  },
+  {
+    id: 14,
+    icon: PieChart,
+    title: "Performance Insights",
+    description: "Understand trends and identify improvement areas.",
+  },
+  {
+    id: 15,
+    icon: Filter,
+    title: "Stat Filters",
+    description: "Filter statistics by club, distances and more.",
+  },
+  {
+    id: 16,
+    icon: CircleDot,
+    title: "Putting Stats",
+    description: "Track putting accuracy and missed distances.",
+  },
+  {
+    id: 17,
+    icon: Sigma,
+    title: "Advanced Putting",
+    description: "Deep putting analytics for serious improvement.",
+  },
+  {
+    id: 18,
+    icon: Users,
+    title: "Find Friends",
+    description: "Search and connect with golfers worldwide.",
+  },
+  {
+    id: 19,
+    icon: Gauge,
+    title: "Club Yardages",
+    description: "View average distances for each club.",
+  },
+  {
+    id: 20,
+    icon: Backpack,
+    title: "My Bag",
+    description: "Manage and organize your golf clubs.",
+  },
+  {
+    id: 21,
+    icon: Sliders,
+    title: "Preferences",
+    description: "Customize app behavior and display settings.",
+  },
+  {
+    id: 22,
+    icon: UserCircle,
+    title: "Profile",
+    description: "Manage your personal information and stats.",
+  },
+  {
+    id: 23,
+    icon: Share,
+    title: "Social Rounds",
+    description: "View and interact with friends’ completed rounds.",
+  },
+  {
+    id: 24,
+    icon: ImagePlus,
+    title: "Social Posts",
+    description: "Like and comment on posts from your network.",
+  },
+  {
+    id: 25,
+    icon: Bell,
+    title: "Notifications",
+    description: "See all alerts and updates in one place.",
+  },
+  {
+    id: 26,
+    icon: Zap,
+    title: "Live Alerts",
+    description: "Receive instant updates and reminders.",
+  },
+  {
+    id: 27,
+    icon: MessageSquare,
+    title: "Messaging",
+    description: "Chat privately with friends inside the app.",
+  },
 ];
 
 const Home = () => {
@@ -112,7 +314,15 @@ const Home = () => {
             >
               TRY SHOT TRACER
             </Link>
-            <button className="px-8 py-4 bg-transparent border border-gray-600 text-white font-bold rounded-full hover:border-white hover:bg-white/5 transition-all">
+            <button
+              onClick={() =>
+                window.open(
+                  "https://play.google.com/store/apps/details?id=com.rbkorny.maxbogeyapp",
+                  "_blank"
+                )
+              }
+              className="px-8 py-4 bg-transparent border border-gray-600 text-white font-bold rounded-full hover:border-white hover:bg-white/5 transition-all"
+            >
               DOWNLOAD APP
             </button>
           </div>
@@ -125,13 +335,17 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="w-full md:w-1/2">
-              {/* Aesthetic mock of phone or video player */}
-              <div className="rounded-3xl border-4 border-amber-500/30 overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.15)] bg-black aspect-[9/16] relative flex items-center justify-center">
-                <div className="absolute inset-0 bg-gray-800 animate-pulse opacity-20"></div>
-                <Target size={64} className="text-amber-500" />
-                <p className="mt-4 text-amber-500 font-mono text-sm uppercase tracking-widest">
-                  Processing Ball Flight...
+              <div className="rounded-3xl border-4 border-amber-500/30 overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.15)] bg-black aspect-[9/16] relative flex items-center justify-center h-180 mx-auto">
+                <div className="absolute inset-0 bg-gray-900 animate-pulse opacity-20 z-99"></div>
+                <Target size={56} className="text-amber-500 z-99" />
+                <p className="ml-4 text-amber-500 font-mono text-sm uppercase tracking-widest z-99 font-bold">
+                  Processing Shot Tracer...
                 </p>
+                <img
+                  src={ProcessingImg}
+                  alt="App preview"
+                  className="absolute inset-0 w-full h-full object-cover opacity-50"
+                />
               </div>
             </div>
             <div className="w-full md:w-1/2 text-left">
@@ -143,9 +357,9 @@ const Home = () => {
                 INSTANTLY.
               </h2>
               <p className="text-gray-400 text-lg mb-8">
-                Add TV-quality shot tracers to your golf videos right here on
-                the web, or inside the app. Customize colors, tails, and see
-                your ball flight like never before.
+                Add TV-quality graphics & shot tracers to your golf videos right
+                here on the web, or inside the app. Customize colors, tails, and
+                see your ball flight like never before.
               </p>
               <Link
                 to="/shot-tracer"
@@ -192,11 +406,11 @@ const Home = () => {
             ))}
           </div>
 
-          <div className="mt-12 text-center">
+          {/* <div className="mt-12 text-center">
             <p className="text-gray-500 text-sm">
               ...and 20+ more features inside the app.
             </p>
-          </div>
+          </div> */}
         </div>
       </section>
     </div>

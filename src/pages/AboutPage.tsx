@@ -1,10 +1,11 @@
 import { MessageCircle, User } from "lucide-react";
+import Founder from "../assets/Karl.png";
 
 const aboutContent = [
   {
     title: "I am MaxBogey!",
     description:
-      "As a 30-year-old golf enthusiast from Norway, I was frustrated by expensive, fragmented golf apps. I wanted one platform for everything.",
+      "As a 31-year-old golf enthusiast from Norway, I was frustrated by expensive, fragmented golf apps. I wanted one platform for everything.",
   },
   {
     title: "Building a Better App",
@@ -42,17 +43,23 @@ const AboutPage = () => (
         <div className="absolute inset-0 bg-amber-500 blur-[100px] opacity-20"></div>
         <div className="relative bg-zinc-900 p-8 rounded-2xl border border-white/10 shadow-2xl">
           <MessageCircle size={48} className="text-amber-500 mb-6" />
+
           <h3 className="text-2xl font-bold mb-4">
             "Let's improve our game together."
           </h3>
+
           <p className="text-gray-400 mb-6">
             Join me on this journey to make golf more enjoyable and accessible
             for everyone.
           </p>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gray-700 rounded-full overflow-hidden">
-              {/* Founder Image Placeholder */}
-              <User className="w-full h-full p-2 text-gray-400" />
+              {/* <User className="w-full h-full p-2 text-gray-400" /> */}
+              <img
+                src={Founder}
+                alt="User avatar"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div>
               <p className="font-bold text-white">Founder</p>

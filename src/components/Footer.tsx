@@ -1,4 +1,13 @@
 import { Share2, Mail } from "lucide-react";
+import {
+  SiSnapchat,
+  SiFacebook,
+  SiYoutube,
+  SiTiktok,
+  SiX,
+  SiInstagram,
+} from "@icons-pack/react-simple-icons";
+
 import { Link } from "react-router-dom";
 
 // 3. Footer
@@ -14,7 +23,7 @@ const Footer = () => (
             </span>
           </span>
           <p className="mt-4 text-gray-500 text-sm">
-            The ultimate golf companion. Premium features, accessible price.
+            The ultimate golf companion. Premium features, completely for free.
           </p>
         </div>
         <div>
@@ -88,13 +97,34 @@ const Footer = () => (
           <h3 className="text-white font-bold uppercase tracking-wider mb-4">
             Connect
           </h3>
-          <div className="flex space-x-4">
-            {/* Social Icons Placeholders */}
+          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-[250px]">
             <div className="w-8 h-8 rounded-full bg-gray-800 hover:bg-amber-500 transition-colors cursor-pointer flex items-center justify-center">
-              <Share2 size={14} className="text-white" />
+              <SiInstagram size={14} className="text-white" />
+            </div>
+
+            <div className="w-8 h-8 rounded-full bg-gray-800 hover:bg-amber-500 transition-colors cursor-pointer flex items-center justify-center">
+              <SiYoutube size={14} className="text-white" />
             </div>
             <div className="w-8 h-8 rounded-full bg-gray-800 hover:bg-amber-500 transition-colors cursor-pointer flex items-center justify-center">
+              <SiFacebook size={14} className="text-white" />
+            </div>
+            <div className="w-8 h-8 rounded-full bg-gray-800 hover:bg-amber-500 transition-colors cursor-pointer flex items-center justify-center">
+              <SiTiktok size={14} className="text-white" />
+            </div>
+            <div className="w-8 h-8 rounded-full bg-gray-800 hover:bg-amber-500 transition-colors cursor-pointer flex items-center justify-center">
+              <SiX size={14} className="text-white" />
+            </div>
+            <div className="w-8 h-8 rounded-full bg-gray-800 hover:bg-amber-500 transition-colors cursor-pointer flex items-center justify-center">
+              <SiSnapchat size={14} className="text-white" />
+            </div>
+            <Link
+              to="/contact"
+              className="w-8 h-8 rounded-full bg-gray-800 hover:bg-amber-500 transition-colors cursor-pointer flex items-center justify-center"
+            >
               <Mail size={14} className="text-white" />
+            </Link>
+            <div className="w-8 h-8 rounded-full bg-gray-800 hover:bg-amber-500 transition-colors cursor-pointer flex items-center justify-center">
+              <Share2 size={14} className="text-white" />
             </div>
           </div>
         </div>
