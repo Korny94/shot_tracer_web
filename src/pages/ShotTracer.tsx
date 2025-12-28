@@ -4000,6 +4000,8 @@ export default function ShotTracerWeb() {
     const originalFPS = detectedFPS;
     console.log(`Exporting at ${originalFPS} FPS`);
 
+    const rect = containerRef.current.getBoundingClientRect();
+
     // --- PRELOAD IMAGES ---
     let targetImageObj: HTMLImageElement | null = null;
     let logoImageObj: HTMLImageElement | null = null;
