@@ -358,7 +358,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="w-full md:w-1/2">
-              <div className="rounded-3xl border-4 border-amber-500/30 overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.15)] bg-black aspect-[9/16] relative flex items-center justify-center h-180 mx-auto">
+              <div className="rounded-3xl border-4 border-amber-500/30 overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.15)] bg-black aspect-[9/16] relative flex items-center justify-center max-h-[85vh] mx-auto ">
                 <div className="absolute inset-0 bg-gray-900 animate-pulse opacity-20 z-99"></div>
                 <Target size={56} className="text-amber-500 z-99" />
                 <p className="ml-4 text-amber-500 font-mono text-sm uppercase tracking-widest z-99 font-bold">
@@ -371,6 +371,7 @@ const Home = () => {
                 />
               </div>
             </div>
+
             <div className="w-full md:w-1/2 text-left">
               <span className="text-amber-500 font-bold tracking-widest uppercase text-sm mb-2 block">
                 New Feature
