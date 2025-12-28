@@ -5,8 +5,8 @@
 //   useMemo,
 //   useCallback,
 // } from "react";
-// import { motion } from "framer-motion";
-// import { Link } from "react-router-dom";
+// import { AnimatePresence, motion } from "framer-motion";
+// import { Link, useNavigate } from "react-router-dom";
 // import { Muxer, ArrayBufferTarget } from "mp4-muxer";
 // import {
 //   Upload,
@@ -26,6 +26,11 @@
 //   UserRoundPen,
 //   Hash,
 //   Trophy,
+//   AlertTriangle,
+//   Plus,
+//   X as XIcon,
+//   AlertCircle,
+//   HeartPlus,
 // } from "lucide-react";
 // import { CiPickerEmpty } from "react-icons/ci";
 // import { SiArchicad } from "react-icons/si";
@@ -87,6 +92,7 @@
 // };
 
 // // Exact Shadow Projection from React Native code
+
 // const projectSubsetToGroundUsingGlobal = (
 //   subsetPts: { x: number; y: number }[],
 //   startIndexInFull: number,
@@ -100,8 +106,14 @@
 //   for (let i = 0; i < subsetPts.length; i++) {
 //     const globalIdx = startIndexInFull + i;
 //     const tGlobal = globalIdx / fullCount;
-//     // Ground line linear interpolation based on global index progress
-//     const y = y0 + (y1 - y0) * tGlobal;
+
+//     // Flip by using: flipped = 1 - (1 - t)^power
+//     // This creates an ease-in curve (compressed at start, expanded at end)
+//     const power = 1.9; // Adjust for desired curvature
+//     const tFlipped = 1 - Math.pow(1 - tGlobal, power);
+
+//     // Ground line with flipped curve interpolation based on global index progress
+//     const y = y0 + (y1 - y0) * tFlipped;
 //     out[i] = { x: subsetPts[i].x, y };
 //   }
 //   return out;
@@ -389,30 +401,170 @@
 //   const [placingMode, setPlacingMode] = useState<"impact" | "landing" | null>(
 //     null
 //   );
-//   const [tracerMode, setTracerMode] = useState<"solid" | "comet" | "hybrid">(
-//     "solid"
+//   // const [tracerMode, setTracerMode] = useState<"solid" | "comet" | "hybrid">(
+//   //   "solid"
+//   // );
+//   // const [tracerColor, setTracerColor] = useState("#ff0000");
+//   // const [tracerOpacity, setTracerOpacity] = useState(0.8);
+//   // const [tracerWidth, setTracerWidth] = useState(12);
+//   // const [distanceScale, setDistanceScale] = useState(1.0);
+//   // const [holeInfoScale, setHoleInfoScale] = useState(1.0);
+//   // const [targetScale, setTargetScale] = useState(1.0);
+//   // const [showShadow, setShowShadow] = useState(true);
+//   // const [showTarget, setShowTarget] = useState(false);
+//   // const [showDistance, setShowDistance] = useState(true);
+//   // const [showHoleInfo, setShowHoleInfo] = useState(false);
+//   // const [showPlayerInfo, setShowPlayerInfo] = useState(false); // Toggle between basic hole info and Pro TV
+
+//   // // Data
+//   // const [yardage, setYardage] = useState("150");
+//   // const [unit, setUnit] = useState<"yd" | "m">("yd");
+//   // const [holeData, setHoleData] = useState({ num: "1", par: "4", dist: "420" });
+//   // const [playerData, setPlayerData] = useState({
+//   //   name: "Tiger Woods",
+//   //   score: "-2",
+//   //   shot: "1",
+//   // });
+
+//   const loadState = (key, defaultValue) => {
+//     const storedValue = localStorage.getItem(key);
+//     return storedValue ? JSON.parse(storedValue) : defaultValue;
+//   };
+
+//   const [tracerMode, setTracerMode] = useState(() =>
+//     loadState("tracerMode", "solid")
 //   );
-//   const [tracerColor, setTracerColor] = useState("#ff0000");
-//   const [tracerOpacity, setTracerOpacity] = useState(0.8);
-//   const [tracerWidth, setTracerWidth] = useState(12);
-//   const [distanceScale, setDistanceScale] = useState(1.0);
-//   const [holeInfoScale, setHoleInfoScale] = useState(1.0);
-//   const [targetScale, setTargetScale] = useState(1.0);
-//   const [showShadow, setShowShadow] = useState(true);
-//   const [showTarget, setShowTarget] = useState(false);
-//   const [showDistance, setShowDistance] = useState(true);
-//   const [showHoleInfo, setShowHoleInfo] = useState(false);
-//   const [showPlayerInfo, setShowPlayerInfo] = useState(false); // Toggle between basic hole info and Pro TV
+//   const [tracerColor, setTracerColor] = useState(() =>
+//     loadState("tracerColor", "#ff0000")
+//   );
+//   const [favorites, setFavorites] = useState<string[]>(() =>
+//     loadState("favorites", ["#ff0000", "#fe9a00", "#165B94", "#ffffff"])
+//   );
+//   const [tracerOpacity, setTracerOpacity] = useState(() =>
+//     loadState("tracerOpacity", 0.8)
+//   );
+//   const [tracerWidth, setTracerWidth] = useState(() =>
+//     loadState("tracerWidth", 12)
+//   );
+//   const [distanceScale, setDistanceScale] = useState(() =>
+//     loadState("distanceScale", 1.0)
+//   );
+//   const [holeInfoScale, setHoleInfoScale] = useState(() =>
+//     loadState("holeInfoScale", 1.0)
+//   );
+//   const [targetScale, setTargetScale] = useState(() =>
+//     loadState("targetScale", 1.0)
+//   );
+//   const [showShadow, setShowShadow] = useState(() =>
+//     loadState("showShadow", true)
+//   );
+//   const [showTarget, setShowTarget] = useState(() =>
+//     loadState("showTarget", false)
+//   );
+//   const [showDistance, setShowDistance] = useState(() =>
+//     loadState("showDistance", true)
+//   );
+//   const [showHoleInfo, setShowHoleInfo] = useState(() =>
+//     loadState("showHoleInfo", false)
+//   );
+//   const [showPlayerInfo, setShowPlayerInfo] = useState(() =>
+//     loadState("showPlayerInfo", false)
+//   );
 
 //   // Data
-//   const [yardage, setYardage] = useState("150");
-//   const [unit, setUnit] = useState<"yd" | "m">("yd");
-//   const [holeData, setHoleData] = useState({ num: "1", par: "4", dist: "420" });
-//   const [playerData, setPlayerData] = useState({
-//     name: "Tiger Woods",
-//     score: "-2",
-//     shot: "1",
-//   });
+//   const [yardage, setYardage] = useState(() => loadState("yardage", "150"));
+//   const [unit, setUnit] = useState(() => loadState("unit", "yd"));
+//   const [holeData, setHoleData] = useState(() =>
+//     loadState("holeData", { num: "1", par: "4", dist: "420" })
+//   );
+//   const [playerData, setPlayerData] = useState(() =>
+//     loadState("playerData", { name: "Tiger Woods", score: "-2", shot: "1" })
+//   );
+
+//   const [showHomeModal, setShowHomeModal] = useState(false);
+//   const [showDeleteModal, setShowDeleteModal] = useState(false);
+//   const [showExportModal, setShowExportModal] = useState(false);
+
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     localStorage.setItem("tracerMode", JSON.stringify(tracerMode));
+//     localStorage.setItem("tracerColor", JSON.stringify(tracerColor));
+//     localStorage.setItem("tracerOpacity", JSON.stringify(tracerOpacity));
+//     localStorage.setItem("tracerWidth", JSON.stringify(tracerWidth));
+//     localStorage.setItem("distanceScale", JSON.stringify(distanceScale));
+//     localStorage.setItem("holeInfoScale", JSON.stringify(holeInfoScale));
+//     localStorage.setItem("targetScale", JSON.stringify(targetScale));
+//     localStorage.setItem("showShadow", JSON.stringify(showShadow));
+//     localStorage.setItem("showTarget", JSON.stringify(showTarget));
+//     localStorage.setItem("showDistance", JSON.stringify(showDistance));
+//     localStorage.setItem("showHoleInfo", JSON.stringify(showHoleInfo));
+//     localStorage.setItem("showPlayerInfo", JSON.stringify(showPlayerInfo));
+//     localStorage.setItem("yardage", JSON.stringify(yardage));
+//     localStorage.setItem("unit", JSON.stringify(unit));
+//     localStorage.setItem("holeData", JSON.stringify(holeData));
+//     localStorage.setItem("playerData", JSON.stringify(playerData));
+//   }, [
+//     tracerMode,
+//     tracerColor,
+//     tracerOpacity,
+//     tracerWidth,
+//     distanceScale,
+//     holeInfoScale,
+//     targetScale,
+//     showShadow,
+//     showTarget,
+//     showDistance,
+//     showHoleInfo,
+//     showPlayerInfo,
+//     yardage,
+//     unit,
+//     holeData,
+//     playerData,
+//   ]);
+
+//   // 'limit' = max reached, 'delete' = confirm removal
+//   const [colorModal, setColorModal] = useState<{
+//     type: "limit" | "delete" | null;
+//     color?: string;
+//   }>({ type: null });
+
+//   // --- 2. UPDATE LOCAL STORAGE EFFECT ---
+//   useEffect(() => {
+//     // ... existing items
+//     localStorage.setItem("favorites", JSON.stringify(favorites));
+//   }, [
+//     // ... existing deps
+//     favorites,
+//   ]);
+
+//   // --- 3. COLOR HANDLERS ---
+//   const handleAddFavorite = () => {
+//     // Check if already exists
+//     if (favorites.includes(tracerColor)) {
+//       confirmDeleteFavorite(tracerColor);
+//       return;
+//     }
+
+//     // Check limit
+//     if (favorites.length >= 10) {
+//       setColorModal({ type: "limit" });
+//       return;
+//     }
+
+//     setFavorites([...favorites, tracerColor]);
+//   };
+
+//   const confirmDeleteFavorite = (colorToDelete: string) => {
+//     setColorModal({ type: "delete", color: colorToDelete });
+//   };
+
+//   const finalizeDelete = () => {
+//     if (colorModal.color) {
+//       setFavorites(favorites.filter((c) => c !== colorModal.color));
+//       setColorModal({ type: null });
+//     }
+//   };
 
 //   // --- EXPORT LOGIC (CANVAS COMPOSITING) ---
 
@@ -489,7 +641,7 @@
 
 //       // --- AUTO BITRATE & CODEC SELECTION ---
 //       const pixelCount = vidW * vidH;
-//       const bitrate = Math.max(25_000_000, Math.round(pixelCount * 10));
+//       const bitrate = Math.max(20_000_000, Math.round(pixelCount * 5));
 
 //       const preferredCodecs = ["avc1.640033", "avc1.4d002a", "avc1.42001e"];
 //       let chosenCodec = "avc1.640033";
@@ -803,8 +955,8 @@
 //                   if (tracerMode === "solid") {
 //                     dShadow = buildTaperedRibbonPath(
 //                       groundPts,
-//                       tracerWidth * pointScale * 0.65,
-//                       tracerWidth * pointScale * 0.25
+//                       tracerWidth * pointScale * 0.5,
+//                       tracerWidth * pointScale * 0.2
 //                     );
 //                     const p = new Path2D(dShadow);
 
@@ -816,9 +968,9 @@
 //                       groundPts[groundPts.length - 1].y
 //                     );
 //                     gradient.addColorStop(0, "rgba(0,0,0,0)");
-//                     gradient.addColorStop(0.3, "rgba(0,0,0,0.2)");
-//                     gradient.addColorStop(0.6, "rgba(0,0,0,0.25)");
-//                     gradient.addColorStop(1, "rgba(0,0,0,0.25)");
+//                     gradient.addColorStop(0.3, "rgba(0,0,0,0.1)");
+//                     gradient.addColorStop(0.6, "rgba(0,0,0,0.15)");
+//                     gradient.addColorStop(1, "rgba(0,0,0,0.2)");
 
 //                     ctx.fillStyle = gradient;
 //                     ctx.globalAlpha = globalOpacity;
@@ -840,7 +992,7 @@
 
 //                     dShadow = buildTaperedRibbonPath(
 //                       groundPts,
-//                       startWidth * 0.6,
+//                       startWidth * 0.45,
 //                       endWidth * 0.2
 //                     );
 //                     const p = new Path2D(dShadow);
@@ -858,7 +1010,7 @@
 //                 if (tracerMode === "solid") {
 //                   dMain = buildTaperedRibbonPath(
 //                     scaledVisiblePts,
-//                     tracerWidth * pointScale,
+//                     tracerWidth * pointScale * 0.9,
 //                     tracerWidth * pointScale * 0.275
 //                   );
 //                   pMain = new Path2D(dMain);
@@ -899,8 +1051,8 @@
 
 //                   dMain = buildTaperedRibbonPath(
 //                     scaledVisiblePts,
-//                     startWidth * 0.7,
-//                     endWidth * 0.45
+//                     startWidth * 0.6,
+//                     endWidth * 0.35
 //                   );
 //                   pMain = new Path2D(dMain);
 //                   ctx.fillStyle = tracerColor;
@@ -1605,6 +1757,17 @@
 //     return () => window.removeEventListener("keydown", onKeyDown);
 //   }, [togglePlay, skipFrame]);
 
+//   // Helper function to format time
+//   // Helper function to format time with one decimal, showing minutes only if over 59 seconds
+//   const formatTime = (timeInSeconds) => {
+//     const minutes = Math.floor(timeInSeconds / 60);
+//     const seconds = (timeInSeconds % 60).toFixed(1); // one decimal place
+//     if (minutes > 0) {
+//       return `${minutes}:${seconds.padStart(4, "0")}`; // Shows minutes and seconds
+//     }
+//     return `${seconds}`; // Shows only seconds if less than a minute
+//   };
+
 //   const handleContainerClick = (e: React.MouseEvent) => {
 //     if (!placingMode || !containerRef.current || !videoRef.current) return;
 //     const rect = containerRef.current.getBoundingClientRect();
@@ -1783,7 +1946,7 @@
 //         );
 //         dShadow = buildTaperedRibbonPath(
 //           groundPts,
-//           startWidth * 0.6,
+//           startWidth * 0.45,
 //           endWidth * 0.2
 //         );
 
@@ -1801,7 +1964,7 @@
 //       // SOLID
 //       dMain = buildTaperedRibbonPath(
 //         visiblePts,
-//         tracerWidth,
+//         tracerWidth * 0.9,
 //         tracerWidth * 0.275
 //       );
 
@@ -1815,8 +1978,8 @@
 //         );
 //         dShadow = buildTaperedRibbonPath(
 //           groundPts,
-//           tracerWidth * 0.65,
-//           tracerWidth * 0.25
+//           tracerWidth * 0.55,
+//           tracerWidth * 0.2
 //         );
 
 //         // Create gradient vector for shadow fade
@@ -1907,9 +2070,9 @@
 //         }}
 //       >
 //         <Link to="/">
-//           <button className="absolute top-8 left-8 flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+//           <button className="absolute top-8 left-8 flex items-center gap-2 text-white transition-colors">
 //             <Home size={24} className="text-amber-500" />{" "}
-//             <span className="font-bold">Home</span>
+//             <span className="font-bold text-xl">Home</span>
 //           </button>
 //         </Link>
 
@@ -1983,13 +2146,13 @@
 //               onLoadedMetadata={onLoadedMetadata}
 //               className="w-full h-full object-contain pointer-events-none block"
 //               playsInline
-//               muted
+//               // muted
 //               crossOrigin="anonymous"
 //             />
 
 //             {placingMode && !isExporting && (
 //               <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-amber-500 text-black font-bold px-6 py-2 rounded-full shadow-xl z-50 animate-pulse pointer-events-none border-2 border-white whitespace-nowrap">
-//                 Click to place {placingMode === "impact" ? "Start" : "End"}{" "}
+//                 Click to place {placingMode === "impact" ? "Impact" : "Landing"}{" "}
 //                 Point
 //               </div>
 //             )}
@@ -2333,6 +2496,9 @@
 //               className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500 hover:accent-amber-400 disabled:opacity-50 disabled:cursor-not-allowed"
 //             />
 //           </div>
+//           <div className="flex justify-between text-lg text-gray-300">
+//             <span>{formatTime(currentTime)}</span>
+//           </div>
 //         </div>
 //       </div>
 
@@ -2340,21 +2506,128 @@
 //       <div className="w-full lg:w-80 bg-[#0a0a0a] border-l border-white/10 flex flex-col h-[40vh] lg:h-screen overflow-y-scroll shrink-0 z-99">
 //         <div className="p-5 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[#0a0a0a] z-999">
 //           <div className="flex items-center gap-2">
-//             <Link to="/">
-//               <button className="hover:bg-white/10 p-2 rounded transition-colors">
-//                 <Home size={20} className="text-amber-500" />
-//               </button>
-//             </Link>
-//             <h2 className="text-base font-bold text-white tracking-wide">
-//               Studio Tools
+//             <button
+//               onClick={() => setShowHomeModal(true)}
+//               className="hover:bg-white/10 p-2 rounded transition-colors"
+//             >
+//               <Home size={20} className="text-amber-500" />
+//             </button>
+
+//             <AnimatePresence>
+//               {showHomeModal && (
+//                 <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+//                   {/* Click outside to close */}
+//                   <div
+//                     className="absolute inset-0"
+//                     onClick={() => setShowHomeModal(false)}
+//                   />
+
+//                   <motion.div
+//                     initial={{ scale: 0.95, opacity: 0 }}
+//                     animate={{ scale: 1, opacity: 1 }}
+//                     exit={{ scale: 0.95, opacity: 0 }}
+//                     className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+//                   >
+//                     {/* Glow Effect */}
+//                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]" />
+
+//                     <div className="flex flex-col items-center text-center">
+//                       <div className="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mb-4 text-amber-500 border border-amber-500/20">
+//                         <AlertTriangle size={24} />
+//                       </div>
+
+//                       <h3 className="text-xl font-bold text-white mb-2">
+//                         Return to Home?
+//                       </h3>
+//                       <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+//                         Are you sure you want to leave the studio? Any unsaved
+//                         progress on your tracer will be lost.
+//                       </p>
+
+//                       <div className="flex gap-3 w-full">
+//                         <button
+//                           onClick={() => setShowHomeModal(false)}
+//                           className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+//                         >
+//                           Cancel
+//                         </button>
+//                         <button
+//                           onClick={() => navigate("/")}
+//                           className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-amber-500 text-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
+//                         >
+//                           Yes, Leave
+//                         </button>
+//                       </div>
+//                     </div>
+//                   </motion.div>
+//                 </div>
+//               )}
+//             </AnimatePresence>
+//             <h2 className="text-base font-bold text-white tracking-wide text-lg">
+//               Shot Tracer Studio
 //             </h2>
 //           </div>
+
 //           <button
-//             onClick={() => setVideoSrc(null)}
+//             onClick={() => setShowDeleteModal(true)}
 //             className="text-red-500 hover:bg-red-500/10 p-2 rounded-md transition-colors"
 //           >
 //             <Trash2 size={18} />
 //           </button>
+
+//           <AnimatePresence>
+//             {showDeleteModal && (
+//               <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+//                 {/* Click outside to close */}
+//                 <div
+//                   className="absolute inset-0"
+//                   onClick={() => setShowDeleteModal(false)}
+//                 />
+
+//                 <motion.div
+//                   initial={{ scale: 0.95, opacity: 0 }}
+//                   animate={{ scale: 1, opacity: 1 }}
+//                   exit={{ scale: 0.95, opacity: 0 }}
+//                   className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+//                 >
+//                   {/* Glow Effect */}
+//                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]" />
+
+//                   <div className="flex flex-col items-center text-center">
+//                     <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4 text-red-500 border border-red-500/20">
+//                       <Trash2 size={24} />
+//                     </div>
+
+//                     <h3 className="text-xl font-bold text-white mb-2">
+//                       Delete Video?
+//                     </h3>
+//                     <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+//                       Are you sure you want to delete this video? Any unsaved
+//                       progress on your tracer will be lost.
+//                     </p>
+
+//                     <div className="flex gap-3 w-full">
+//                       <button
+//                         onClick={() => setShowDeleteModal(false)}
+//                         className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+//                       >
+//                         Cancel
+//                       </button>
+//                       <button
+//                         onClick={() => {
+//                           setVideoSrc(null);
+//                           setShowDeleteModal(false);
+//                         }}
+//                         className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-red-500 text-white hover:bg-red-400 transition-colors shadow-lg shadow-red-500/20"
+//                       >
+//                         Yes, Delete
+//                       </button>
+//                     </div>
+//                   </div>
+//                 </motion.div>
+//               </div>
+//             )}
+//           </AnimatePresence>
 //         </div>
 
 //         <div className="p-5 space-y-6">
@@ -2370,7 +2643,7 @@
 //                   : "bg-zinc-900 border-white/10 text-gray-300"
 //               }`}
 //             >
-//               Set Start
+//               Set Impact
 //             </button>
 //             <button
 //               onClick={() => {
@@ -2383,7 +2656,7 @@
 //                   : "bg-zinc-900 border-white/10 text-gray-300"
 //               }`}
 //             >
-//               Set End
+//               Set Landing
 //             </button>
 //           </div>
 
@@ -2416,7 +2689,8 @@
 //               {["solid", "comet", "hybrid"].map((m) => (
 //                 <button
 //                   key={m}
-//                   onClick={() => setTracerMode(m as any)}
+//                   // onClick={() => setTracerMode(m as any)}
+//                   onClick={() => setTracerMode(m)}
 //                   className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${
 //                     tracerMode === m
 //                       ? "bg-amber-500 text-black"
@@ -2428,10 +2702,8 @@
 //               ))}
 //             </div>
 
-//             <div className="flex items-center gap-2 mt-8 mb-8">
-//               {/* Custom color (color wheel) */}
+//             {/* <div className="flex items-center gap-2 mt-8 mb-8">
 //               <div className="relative w-7 h-7 rounded-full cursor-pointer">
-//                 {/* Color input MUST be on top */}
 //                 <input
 //                   type="color"
 //                   value={tracerColor}
@@ -2439,9 +2711,7 @@
 //                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
 //                 />
 
-//                 {/* Visual layer */}
 //                 <div className="w-7 h-7 rounded-full flex items-center justify-center relative pointer-events-none">
-//                   {/* Color wheel */}
 //                   <div
 //                     className="w-full h-full rounded-full"
 //                     style={{
@@ -2450,7 +2720,6 @@
 //                     }}
 //                   />
 
-//                   {/* Center dot */}
 //                   <div
 //                     className="absolute w-5 h-5 rounded-full border-4"
 //                     style={{
@@ -2462,7 +2731,6 @@
 //                 </div>
 //               </div>
 
-//               {/* Preset colors */}
 //               {["#ff0000", "#fe9a00", "#165B94", "#ffffff"].map((c) => (
 //                 <button
 //                   key={c}
@@ -2475,11 +2743,270 @@
 //                   style={{ backgroundColor: c }}
 //                 />
 //               ))}
+//             </div> */}
+
+//             <div className="relative mb-8">
+//               {/* MODAL OVERLAYS (AnimatePresence) */}
+//               <AnimatePresence>
+//                 {colorModal.type && (
+//                   <div className="absolute top-[-140px] left-0 w-full z-50 flex justify-center pointer-events-none">
+//                     <motion.div
+//                       initial={{ opacity: 0, y: 10, scale: 0.9 }}
+//                       animate={{ opacity: 1, y: 0, scale: 1 }}
+//                       exit={{ opacity: 0, y: 10, scale: 0.9 }}
+//                       className="bg-zinc-900 border border-white/20 shadow-2xl rounded-xl p-4 w-[260px] pointer-events-auto"
+//                     >
+//                       {colorModal.type === "limit" ? (
+//                         <div className="text-center">
+//                           <div className="flex items-center justify-center gap-2 text-amber-500 font-bold mb-2">
+//                             <AlertCircle size={16} /> Limit Reached
+//                           </div>
+//                           <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+//                             You can only save 10 favorites. <br /> Remove one to
+//                             add this color.
+//                           </p>
+//                           <button
+//                             onClick={() => setColorModal({ type: null })}
+//                             className="w-full py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded text-xs font-bold text-white transition-colors"
+//                           >
+//                             Got it
+//                           </button>
+//                         </div>
+//                       ) : (
+//                         <div className="text-center">
+//                           <div className="flex items-center justify-center gap-2 text-red-500 font-bold mb-2">
+//                             <Trash2 size={16} /> Remove Color?
+//                           </div>
+//                           <p className="text-xs text-gray-400 mb-3">
+//                             Remove this color from your favorites?
+//                           </p>
+//                           <div className="flex gap-2">
+//                             <button
+//                               onClick={() => setColorModal({ type: null })}
+//                               className="flex-1 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded text-xs font-bold text-white transition-colors"
+//                             >
+//                               Cancel
+//                             </button>
+//                             <button
+//                               onClick={finalizeDelete}
+//                               className="flex-1 py-1.5 bg-red-600 hover:bg-red-500 rounded text-xs font-bold text-white transition-colors shadow-lg shadow-red-900/20"
+//                             >
+//                               Remove
+//                             </button>
+//                           </div>
+//                         </div>
+//                       )}
+//                     </motion.div>
+//                   </div>
+//                 )}
+//               </AnimatePresence>
+
+//               {/* <div className="flex items-center gap-4 mt-7">
+
+//                 <div className="flex items-center gap-2 bg-zinc-900 p-1.5 rounded-full border border-white/10 pr-3">
+//                   <div className="relative w-8 h-8 rounded-full cursor-pointer hover:scale-105 transition-transform">
+//                     <input
+//                       type="color"
+//                       value={tracerColor}
+//                       onChange={(e) => setTracerColor(e.target.value)}
+//                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+//                     />
+//                     <div className="w-8 h-8 rounded-full flex items-center justify-center relative pointer-events-none overflow-hidden ring-1 ring-black/50">
+//                       <div
+//                         className="w-full h-full"
+//                         style={{
+//                           background:
+//                             "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)",
+//                         }}
+//                       />
+//                       <div
+//                         className="absolute w-6 h-6 rounded-full border-4 border-black shadow-sm"
+//                         style={{ backgroundColor: tracerColor }}
+//                       />
+//                     </div>
+//                   </div>
+
+//                   <button
+//                     onClick={handleAddFavorite}
+//                     className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+//                       favorites.includes(tracerColor)
+//                         ? "bg-zinc-800 text-gray-600 cursor-default"
+//                         : "bg-amber-500 text-black hover:bg-white hover:scale-110"
+//                     }`}
+//                   >
+//                     {favorites.includes(tracerColor) ? (
+//                       <Trash2
+//                         size={16}
+//                         strokeWidth={3}
+//                         className="text-red-500"
+//                       />
+//                     ) : (
+//                       <Plus size={16} strokeWidth={3} />
+//                     )}
+//                   </button>
+//                 </div>
+
+//                 <div className="flex flex-1 gap-2 flex-wrap">
+//                   <AnimatePresence>
+//                     {favorites.map((c) => (
+//                       <motion.div
+//                         key={c}
+//                         initial={{ scale: 0, opacity: 0 }}
+//                         animate={{ scale: 1, opacity: 1 }}
+//                         exit={{ scale: 0, opacity: 0 }}
+//                         className="relative group"
+//                       >
+//                         <button
+//                           onClick={() => setTracerColor(c)}
+//                           className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
+//                             tracerColor === c
+//                               ? "border-white scale-110 ring-2 ring-white/20"
+//                               : "border-transparent hover:scale-105 hover:border-white/50"
+//                           }`}
+//                           style={{ backgroundColor: c }}
+//                         />
+//                       </motion.div>
+//                     ))}
+//                   </AnimatePresence>
+
+//                   {Array.from({
+//                     length: Math.max(0, 8 - favorites.length),
+//                   }).map((_, i) => (
+//                     <div
+//                       key={i}
+//                       className="w-8 h-8 rounded-full border border-white/5 bg-white/5 flex items-center justify-center"
+//                     >
+//                       <div className="w-1 h-1 rounded-full bg-white/10" />
+//                     </div>
+//                   ))}
+//                 </div>
+//               </div> */}
+//               <div className="flex flex-col gap-2 mt-7">
+//                 {/* First row: Color wheel and first 4 favorites */}
+//                 <div className="flex w-full items-center gap-1 justify-evenly ml-1">
+//                   {/* Color wheel and add button */}
+//                   <div className="flex items-center gap-3 p-1.5 rounded-full mb-1">
+//                     <div className="relative w-8 h-8 rounded-full cursor-pointer hover:scale-105 transition-transform">
+//                       <input
+//                         type="color"
+//                         value={tracerColor}
+//                         onChange={(e) => setTracerColor(e.target.value)}
+//                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+//                       />
+//                       <div className="w-8 h-8 rounded-full flex items-center justify-center relative pointer-events-none overflow-hidden ring-1 ring-black/50">
+//                         <div
+//                           className="w-full h-full"
+//                           style={{
+//                             background:
+//                               "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)",
+//                           }}
+//                         />
+//                         <div
+//                           className="absolute w-6 h-6 rounded-full border-4 border-black shadow-sm"
+//                           style={{ backgroundColor: tracerColor }}
+//                         />
+//                       </div>
+//                     </div>
+
+//                     <button
+//                       onClick={handleAddFavorite}
+//                       className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+//                         favorites.includes(tracerColor)
+//                           ? "bg-transparent cursor-default"
+//                           : "bg-amber-500 text-black hover:bg-white hover:scale-110"
+//                       }`}
+//                     >
+//                       {favorites.includes(tracerColor) ? (
+//                         <Trash2
+//                           size={18}
+//                           strokeWidth={3}
+//                           className="text-amber-500"
+//                         />
+//                       ) : (
+//                         <Plus size={16} strokeWidth={3} />
+//                       )}
+//                     </button>
+//                   </div>
+
+//                   {/* First row of favorites (next to color wheel) - max 4 */}
+//                   <div className="flex w-full justify-evenly">
+//                     <AnimatePresence>
+//                       {favorites.slice(0, 4).map((c) => (
+//                         <motion.div
+//                           key={c}
+//                           initial={{ scale: 0, opacity: 0 }}
+//                           animate={{ scale: 1, opacity: 1 }}
+//                           exit={{ scale: 0, opacity: 0 }}
+//                           className="relative group"
+//                         >
+//                           <button
+//                             onClick={() => setTracerColor(c)}
+//                             className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
+//                               tracerColor === c
+//                                 ? "border-white border-3 scale-110"
+//                                 : "border-transparent hover:scale-105 hover:border-white hover:border-3"
+//                             }`}
+//                             style={{ backgroundColor: c }}
+//                           />
+//                         </motion.div>
+//                       ))}
+//                     </AnimatePresence>
+
+//                     {/* Empty slots for first row */}
+//                     {Array.from({
+//                       length: Math.max(0, 4 - Math.min(favorites.length, 4)),
+//                     }).map((_, i) => (
+//                       <div
+//                         key={`empty-first-${i}`}
+//                         className="w-8 h-8 rounded-full border border-white/5 bg-white/5 flex items-center justify-center"
+//                       >
+//                         <div className="w-1 h-1 rounded-full bg-white/10" />
+//                       </div>
+//                     ))}
+//                   </div>
+//                 </div>
+
+//                 {/* Second row: Remaining favorites (6 slots) - full width */}
+//                 <div className="flex gap-1 w-full justify-evenly">
+//                   <AnimatePresence>
+//                     {favorites.slice(4, 10).map((c) => (
+//                       <motion.div
+//                         key={c}
+//                         initial={{ scale: 0, opacity: 0 }}
+//                         animate={{ scale: 1, opacity: 1 }}
+//                         exit={{ scale: 0, opacity: 0 }}
+//                         className="relative group"
+//                       >
+//                         <button
+//                           onClick={() => setTracerColor(c)}
+//                           className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
+//                             tracerColor === c
+//                               ? "border-white border-3 scale-110"
+//                               : "border-transparent hover:scale-105 hover:border-white hover:border-3"
+//                           }`}
+//                           style={{ backgroundColor: c }}
+//                         />
+//                       </motion.div>
+//                     ))}
+//                   </AnimatePresence>
+
+//                   {/* Empty slots for second row - up to 6 */}
+//                   {Array.from({
+//                     length: Math.max(0, 6 - Math.max(favorites.length - 4, 0)),
+//                   }).map((_, i) => (
+//                     <div
+//                       key={`empty-second-${i}`}
+//                       className="w-8 h-8 rounded-full border border-white/5 bg-white/5 flex items-center justify-center"
+//                     >
+//                       <div className="w-1 h-1 rounded-full bg-white/10" />
+//                     </div>
+//                   ))}
+//                 </div>
+//               </div>
 //             </div>
 
-//             {/* Opacity & Width Sliders */}
 //             <div className="space-y-1 mt-2">
-//               <div className="flex justify-between text-[10px] text-gray-400">
+//               <div className="flex justify-between text-[12px] text-gray-400">
 //                 <span>Opacity</span>
 //                 <span>{Math.round(tracerOpacity * 100)}%</span>
 //               </div>
@@ -2494,7 +3021,7 @@
 //               />
 //             </div>
 //             <div className="space-y-1">
-//               <div className="flex justify-between text-[10px] text-gray-400">
+//               <div className="flex justify-between text-[12px] text-gray-400">
 //                 <span>Width</span>
 //                 <span>{tracerWidth}px</span>
 //               </div>
@@ -2511,7 +3038,6 @@
 
 //           <div className="w-full h-px bg-white/5" />
 
-//           {/* WIDGETS CONFIG */}
 //           <div className="space-y-6">
 //             <div className="flex gap-4 items-center justify-center text-[12px] font-bold text-gray-500 uppercase tracking-widest">
 //               <BsDisplay size={22} className="text-amber-500" />{" "}
@@ -2558,7 +3084,6 @@
 
 //                 {showTarget && (
 //                   <div className="pb-3 animate-in slide-in-from-top-2 w-full border-t border-white/10 ">
-//                     {/* Target widget scale slider */}
 //                     <div className="pt-2">
 //                       <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
 //                         <span>Size</span>
@@ -2619,7 +3144,6 @@
 //                     </button>
 //                   </div>
 
-//                   {/* Distance widget scale slider */}
 //                   <div className="pt-2">
 //                     <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
 //                       <span>Size</span>
@@ -2802,7 +3326,10 @@
 //               >
 //                 <div className="flex w-full justify-between">
 //                   <div className="flex items-center gap-2 text-xs font-bold text-gray-300 mr-6">
-//                     <item.icon size={14} className="text-amber-500" />{" "}
+//                     {/* <item.icon size={14} className="text-amber-500" />{" "}
+//                      */}
+//                     <SiArchicad size={14} className="text-amber-500" />
+
 //                     <span style={{ marginTop: -1.1 }}>{item.label}</span>
 //                   </div>
 
@@ -2825,7 +3352,7 @@
 //           <div className="w-full h-px bg-white/5" />
 
 //           <button
-//             onClick={handleExport}
+//             onClick={() => setShowExportModal(true)}
 //             disabled={isExporting}
 //             className="w-full bg-[#165B94] bg-amber-500 hover:bg-white text-black font-bold py-3 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
 //           >
@@ -2837,6 +3364,59 @@
 //               </>
 //             )}
 //           </button>
+
+//           <AnimatePresence>
+//             {showExportModal && (
+//               <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+//                 {/* Click outside to close */}
+//                 <div
+//                   className="absolute inset-0"
+//                   onClick={() => setShowExportModal(false)}
+//                 />
+
+//                 <motion.div
+//                   initial={{ scale: 0.95, opacity: 0 }}
+//                   animate={{ scale: 1, opacity: 1 }}
+//                   exit={{ scale: 0.95, opacity: 0 }}
+//                   className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+//                 >
+//                   {/* Glow Effect */}
+//                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]" />
+
+//                   <div className="flex flex-col items-center text-center">
+//                     <div className="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mb-4 text-amber-500 border border-amber-500/20">
+//                       <Download size={24} />
+//                     </div>
+
+//                     <h3 className="text-xl font-bold text-white mb-2">
+//                       Export Video?
+//                     </h3>
+//                     <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+//                       Are you sure you want to export this video?
+//                     </p>
+
+//                     <div className="flex gap-3 w-full">
+//                       <button
+//                         onClick={() => setShowExportModal(false)}
+//                         className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+//                       >
+//                         Cancel
+//                       </button>
+//                       <button
+//                         onClick={() => {
+//                           handleExport();
+//                           setShowExportModal(false);
+//                         }}
+//                         className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-amber-500 text-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+//                       >
+//                         <Download size={18} /> Yes, Export
+//                       </button>
+//                     </div>
+//                   </div>
+//                 </motion.div>
+//               </div>
+//             )}
+//           </AnimatePresence>
 //         </div>
 //       </div>
 //     </div>
@@ -2873,9 +3453,7 @@ import {
   Trophy,
   AlertTriangle,
   Plus,
-  X as XIcon,
   AlertCircle,
-  HeartPlus,
 } from "lucide-react";
 import { CiPickerEmpty } from "react-icons/ci";
 import { SiArchicad } from "react-icons/si";
@@ -3246,30 +3824,6 @@ export default function ShotTracerWeb() {
   const [placingMode, setPlacingMode] = useState<"impact" | "landing" | null>(
     null
   );
-  // const [tracerMode, setTracerMode] = useState<"solid" | "comet" | "hybrid">(
-  //   "solid"
-  // );
-  // const [tracerColor, setTracerColor] = useState("#ff0000");
-  // const [tracerOpacity, setTracerOpacity] = useState(0.8);
-  // const [tracerWidth, setTracerWidth] = useState(12);
-  // const [distanceScale, setDistanceScale] = useState(1.0);
-  // const [holeInfoScale, setHoleInfoScale] = useState(1.0);
-  // const [targetScale, setTargetScale] = useState(1.0);
-  // const [showShadow, setShowShadow] = useState(true);
-  // const [showTarget, setShowTarget] = useState(false);
-  // const [showDistance, setShowDistance] = useState(true);
-  // const [showHoleInfo, setShowHoleInfo] = useState(false);
-  // const [showPlayerInfo, setShowPlayerInfo] = useState(false); // Toggle between basic hole info and Pro TV
-
-  // // Data
-  // const [yardage, setYardage] = useState("150");
-  // const [unit, setUnit] = useState<"yd" | "m">("yd");
-  // const [holeData, setHoleData] = useState({ num: "1", par: "4", dist: "420" });
-  // const [playerData, setPlayerData] = useState({
-  //   name: "Tiger Woods",
-  //   score: "-2",
-  //   shot: "1",
-  // });
 
   const loadState = (key, defaultValue) => {
     const storedValue = localStorage.getItem(key);
@@ -3426,10 +3980,9 @@ export default function ShotTracerWeb() {
     const vidW = video.videoWidth;
     const vidH = video.videoHeight;
 
-    // --- 1. DETECT FPS WITH FALLBACK ---
+    // --- 1. DETECT FPS ---
     let detectedFPS = 30;
     try {
-      // Cast to 'any' because captureStream is not fully standardized in all TS libs yet
       const stream = (video as any).captureStream
         ? (video as any).captureStream()
         : (video as any).mozCaptureStream?.();
@@ -3447,25 +4000,44 @@ export default function ShotTracerWeb() {
     const originalFPS = detectedFPS;
     console.log(`Exporting at ${originalFPS} FPS`);
 
-    const rect = containerRef.current.getBoundingClientRect();
-
+    // --- PRELOAD IMAGES ---
     let targetImageObj: HTMLImageElement | null = null;
     let logoImageObj: HTMLImageElement | null = null;
     try {
-      if (showTarget) targetImageObj = await loadImage(TargetImg);
-      if (showPlayerInfo) logoImageObj = await loadImage(LogoImg);
+      if (showTarget && TargetImg) targetImageObj = await loadImage(TargetImg);
+      if (showPlayerInfo && LogoImg) logoImageObj = await loadImage(LogoImg);
     } catch (e) {
       console.warn("Could not load assets for export", e);
     }
 
     try {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      if (!ctx) throw new Error("No 2D context available");
+      // --- 2. PREPARE AUDIO (NEW) ---
+      // We fetch the blob/file from the video src to decode audio
+      let audioBuffer: AudioBuffer | null = null;
+      let audioSampleRate = 44100;
+      let audioNumberOfChannels = 2;
 
-      canvas.width = vidW;
-      canvas.height = vidH;
+      try {
+        console.log("Decoding audio...");
+        const response = await fetch(video.src);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioCtx = new (window.AudioContext ||
+          (window as any).webkitAudioContext)();
+        audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+        audioSampleRate = audioBuffer.sampleRate;
+        audioNumberOfChannels = audioBuffer.numberOfChannels;
+        await audioCtx.close();
+        console.log(
+          `Audio decoded: ${audioSampleRate}Hz, ${audioNumberOfChannels} channels`
+        );
+      } catch (audioErr) {
+        console.warn(
+          "No audio track found or decode failed. Exporting silent video.",
+          audioErr
+        );
+      }
 
+      // --- 3. SETUP MUXER ---
       const target = new ArrayBufferTarget();
 
       const muxer = new Muxer({
@@ -3475,16 +4047,22 @@ export default function ShotTracerWeb() {
           width: vidW,
           height: vidH,
         },
+        // ADDED: Audio configuration
+        audio: audioBuffer
+          ? {
+              codec: "aac",
+              numberOfChannels: audioNumberOfChannels,
+              sampleRate: audioSampleRate,
+            }
+          : undefined,
         fastStart: "in-memory",
       });
 
       if (typeof VideoEncoder === "undefined") {
-        throw new Error(
-          "WebCodecs API not supported. Use Chrome 94+, Edge 94+, or Opera 80+"
-        );
+        throw new Error("WebCodecs API not supported.");
       }
 
-      // --- AUTO BITRATE & CODEC SELECTION ---
+      // --- 4. VIDEO ENCODER SETUP ---
       const pixelCount = vidW * vidH;
       const bitrate = Math.max(20_000_000, Math.round(pixelCount * 5));
 
@@ -3507,24 +4085,15 @@ export default function ShotTracerWeb() {
         }
       }
 
-      console.log("Chosen codec:", chosenCodec, "Bitrate:", bitrate);
-
-      const encoder = new VideoEncoder({
-        output: (chunk, meta) => {
-          try {
-            muxer.addVideoChunk(chunk, meta);
-          } catch (e) {
-            console.error("Error adding chunk to muxer:", e);
-          }
-        },
+      const videoEncoder = new VideoEncoder({
+        output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
         error: (e) => {
-          console.error("Encoder error:", e);
-          alert(`Encoder error: ${e.message}`);
+          console.error("VideoEncoder error:", e);
           setIsExporting(false);
         },
       });
 
-      encoder.configure({
+      videoEncoder.configure({
         codec: chosenCodec,
         width: vidW,
         height: vidH,
@@ -3534,20 +4103,84 @@ export default function ShotTracerWeb() {
         avc: { format: "annexb" },
       });
 
-      video.currentTime = 0;
-      video.volume = 0;
+      // --- 5. AUDIO ENCODING (NEW) ---
+      if (audioBuffer) {
+        const audioEncoder = new AudioEncoder({
+          output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+          error: (e) => console.error("AudioEncoder error", e),
+        });
 
-      // Ensure duration is valid
+        audioEncoder.configure({
+          codec: "mp4a.40.2", // AAC
+          numberOfChannels: audioNumberOfChannels,
+          sampleRate: audioSampleRate,
+        });
+
+        // Helper to interleave planar data (L,L,L,R,R,R) to (L,R,L,R,L,R)
+        const interleave = (input: AudioBuffer) => {
+          const length = input.length;
+          const channels = input.numberOfChannels;
+          const result = new Float32Array(length * channels);
+
+          for (let i = 0; i < channels; i++) {
+            const channelData = input.getChannelData(i);
+            for (let j = 0; j < length; j++) {
+              result[j * channels + i] = channelData[j];
+            }
+          }
+          return result;
+        };
+
+        // Encode audio in chunks (e.g., 1 second per chunk to prevent UI lockup)
+        const data = interleave(audioBuffer);
+        const totalSamples = data.length / audioNumberOfChannels;
+        const samplesPerChunk = audioSampleRate; // 1 second chunks
+
+        let sampleOffset = 0;
+        while (sampleOffset < totalSamples) {
+          const count = Math.min(samplesPerChunk, totalSamples - sampleOffset);
+          const chunkData = data.slice(
+            sampleOffset * audioNumberOfChannels,
+            (sampleOffset + count) * audioNumberOfChannels
+          );
+
+          const audioData = new AudioData({
+            format: "f32", // Interleaved float32
+            sampleRate: audioSampleRate,
+            numberOfFrames: count,
+            numberOfChannels: audioNumberOfChannels,
+            timestamp: (sampleOffset / audioSampleRate) * 1_000_000,
+            data: chunkData,
+          });
+
+          audioEncoder.encode(audioData);
+          audioData.close();
+          sampleOffset += count;
+        }
+
+        await audioEncoder.flush();
+      }
+
+      // --- 6. PREPARE CANVAS ---
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("No 2D context available");
+      canvas.width = vidW;
+      canvas.height = vidH;
+
+      // Reset video for recording
+      video.currentTime = 0;
+      video.volume = 0; // Keep mute during render, we encoded the audio separately
+
       const duration = video.duration || 1;
       const totalFrames = Math.ceil(duration * originalFPS);
-
-      // *** FIX: Initialize currentFrame here ***
       let currentFrame = 0;
 
+      // --- 7. PROCESS FRAMES ---
       const processFrame = async () => {
         if (currentFrame >= totalFrames) {
           try {
-            await encoder.flush();
+            await videoEncoder.flush();
             muxer.finalize();
 
             const { buffer } = target;
@@ -3570,7 +4203,7 @@ export default function ShotTracerWeb() {
             setIsExporting(false);
             video.currentTime = originalTime;
             video.volume = originalVolume;
-            alert("Export failed during finalization: " + (e as Error).message);
+            alert("Export failed: " + (e as Error).message);
           }
           return;
         }
@@ -3595,13 +4228,6 @@ export default function ShotTracerWeb() {
           ctx.drawImage(video, 0, 0, vidW, vidH);
 
           const t = video.currentTime;
-
-          // Global opacity
-          let globalOpacity = 1;
-          if (landingPoint && t > landingPoint.time + 1.5) {
-            const fadeProgress = (t - (landingPoint.time + 1.5)) / 0.5;
-            globalOpacity = Math.max(0, 1 - fadeProgress);
-          }
 
           // --- STEP 1: TARGET (behind everything) ---
           if (showTarget && targetImageObj) {
@@ -4393,14 +5019,12 @@ export default function ShotTracerWeb() {
 
             ctx.restore();
           }
-
-          // Encode frame
           const frame = new VideoFrame(canvas, {
             timestamp: currentFrame * (1_000_000 / originalFPS),
             duration: 1_000_000 / originalFPS,
           });
 
-          encoder.encode(frame, {
+          videoEncoder.encode(frame, {
             keyFrame: currentFrame % originalFPS === 0 || currentFrame === 0,
           });
 
@@ -4408,12 +5032,10 @@ export default function ShotTracerWeb() {
 
           currentFrame++;
           setExportProgress(Math.round((currentFrame / totalFrames) * 100));
-
           setTimeout(processFrame, 0);
         } catch (frameError) {
           console.error("Frame processing error:", frameError);
           currentFrame++;
-          setExportProgress(Math.round((currentFrame / totalFrames) * 100));
           setTimeout(processFrame, 0);
         }
       };
@@ -5547,49 +6169,6 @@ export default function ShotTracerWeb() {
               ))}
             </div>
 
-            {/* <div className="flex items-center gap-2 mt-8 mb-8">
-              <div className="relative w-7 h-7 rounded-full cursor-pointer">
-                <input
-                  type="color"
-                  value={tracerColor}
-                  onChange={(e) => setTracerColor(e.target.value)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                />
-
-                <div className="w-7 h-7 rounded-full flex items-center justify-center relative pointer-events-none">
-                  <div
-                    className="w-full h-full rounded-full"
-                    style={{
-                      background:
-                        "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)",
-                    }}
-                  />
-
-                  <div
-                    className="absolute w-5 h-5 rounded-full border-4"
-                    style={{
-                      backgroundColor: tracerColor,
-                      boxShadow: `0 0 4px ${tracerColor}`,
-                      borderColor: "black",
-                    }}
-                  />
-                </div>
-              </div>
-
-              {["#ff0000", "#fe9a00", "#165B94", "#ffffff"].map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setTracerColor(c)}
-                  className={`w-6 h-6 rounded-full border-2 transition ${
-                    tracerColor === c
-                      ? "border-white scale-110"
-                      : "border-transparent"
-                  }`}
-                  style={{ backgroundColor: c }}
-                />
-              ))}
-            </div> */}
-
             <div className="relative mb-8">
               {/* MODAL OVERLAYS (AnimatePresence) */}
               <AnimatePresence>
@@ -5646,88 +6225,6 @@ export default function ShotTracerWeb() {
                 )}
               </AnimatePresence>
 
-              {/* <div className="flex items-center gap-4 mt-7">
-            
-                <div className="flex items-center gap-2 bg-zinc-900 p-1.5 rounded-full border border-white/10 pr-3">
-                  <div className="relative w-8 h-8 rounded-full cursor-pointer hover:scale-105 transition-transform">
-                    <input
-                      type="color"
-                      value={tracerColor}
-                      onChange={(e) => setTracerColor(e.target.value)}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    />
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center relative pointer-events-none overflow-hidden ring-1 ring-black/50">
-                      <div
-                        className="w-full h-full"
-                        style={{
-                          background:
-                            "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)",
-                        }}
-                      />
-                      <div
-                        className="absolute w-6 h-6 rounded-full border-4 border-black shadow-sm"
-                        style={{ backgroundColor: tracerColor }}
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleAddFavorite}
-                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                      favorites.includes(tracerColor)
-                        ? "bg-zinc-800 text-gray-600 cursor-default"
-                        : "bg-amber-500 text-black hover:bg-white hover:scale-110"
-                    }`}
-                  >
-                    {favorites.includes(tracerColor) ? (
-                      <Trash2
-                        size={16}
-                        strokeWidth={3}
-                        className="text-red-500"
-                      />
-                    ) : (
-                      <Plus size={16} strokeWidth={3} />
-                    )}
-                  </button>
-                </div>
-
-        
-                <div className="flex flex-1 gap-2 flex-wrap">
-                  <AnimatePresence>
-                    {favorites.map((c) => (
-                      <motion.div
-                        key={c}
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
-                        className="relative group"
-                      >
-                        <button
-                          onClick={() => setTracerColor(c)}
-                          className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
-                            tracerColor === c
-                              ? "border-white scale-110 ring-2 ring-white/20"
-                              : "border-transparent hover:scale-105 hover:border-white/50"
-                          }`}
-                          style={{ backgroundColor: c }}
-                        />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-
-    
-                  {Array.from({
-                    length: Math.max(0, 8 - favorites.length),
-                  }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-8 h-8 rounded-full border border-white/5 bg-white/5 flex items-center justify-center"
-                    >
-                      <div className="w-1 h-1 rounded-full bg-white/10" />
-                    </div>
-                  ))}
-                </div>
-              </div> */}
               <div className="flex flex-col gap-2 mt-7">
                 {/* First row: Color wheel and first 4 favorites */}
                 <div className="flex w-full items-center gap-1 justify-evenly ml-1">
