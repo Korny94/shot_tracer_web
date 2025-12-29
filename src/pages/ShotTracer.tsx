@@ -3599,7 +3599,9 @@ const ControlNode = ({ x, y, color, label, onDragStart }: any) => (
       className="w-8 h-8 rounded-full border-2 border-white shadow-[0_2px_4px_rgba(0,0,0,0.5)] flex items-center justify-center transition-transform"
       style={{ backgroundColor: color }}
     >
-      {/* <div className="w-0.75 h-0.75  bg-white rounded-full" />  */}
+      {label === "Start" && (
+        <div className="w-0.75 h-0.75  bg-white rounded-full" />
+      )}
     </div>
     <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black/90 text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/20 z-40">
       {label}
@@ -3818,6 +3820,7 @@ export default function ShotTracerWeb() {
     target: { x: 150, y: 150 },
     holeInfo: { x: 20, y: 100 },
   });
+
   const [widgetSizes, setWidgetSizes] = useState<any>({});
 
   // Settings
@@ -3921,6 +3924,14 @@ export default function ShotTracerWeb() {
     holeData,
     playerData,
   ]);
+
+  const handleToggleInfo = () => {
+    setShowPlayerInfo(!showPlayerInfo);
+    setWidgetPos((prev) => ({
+      ...prev,
+      holeInfo: { x: 20, y: 100 }, // Reset to original position
+    }));
+  };
 
   // 'limit' = max reached, 'delete' = confirm removal
   const [colorModal, setColorModal] = useState<{
@@ -6574,7 +6585,8 @@ export default function ShotTracerWeb() {
                         Player Info
                       </div>
                       <button
-                        onClick={() => setShowPlayerInfo(!showPlayerInfo)}
+                        // onClick={() => setShowPlayerInfo(!showPlayerInfo)}
+                        onClick={handleToggleInfo}
                         className={`w-8 h-4 rounded-full relative transition-colors ${
                           showPlayerInfo ? "bg-amber-500" : "bg-gray-700"
                         }`}
