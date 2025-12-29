@@ -108,7 +108,7 @@ const Navbar = () => {
 
       {createPortal(
         <AnimatePresence>
-          {showModal && !isMobile && (
+          {showModal && isMobile && (
             <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
               {/* Click outside to close */}
               <div
