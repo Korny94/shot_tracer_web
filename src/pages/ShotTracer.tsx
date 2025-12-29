@@ -28,9 +28,7 @@
 //   Trophy,
 //   AlertTriangle,
 //   Plus,
-//   X as XIcon,
 //   AlertCircle,
-//   HeartPlus,
 // } from "lucide-react";
 // import { CiPickerEmpty } from "react-icons/ci";
 // import { SiArchicad } from "react-icons/si";
@@ -176,7 +174,9 @@
 //       className="w-8 h-8 rounded-full border-2 border-white shadow-[0_2px_4px_rgba(0,0,0,0.5)] flex items-center justify-center transition-transform"
 //       style={{ backgroundColor: color }}
 //     >
-//       {/* <div className="w-0.75 h-0.75  bg-white rounded-full" />  */}
+//       {label === "Start" && (
+//         <div className="w-0.75 h-0.75  bg-white rounded-full" />
+//       )}
 //     </div>
 //     <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black/90 text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/20 z-40">
 //       {label}
@@ -395,36 +395,13 @@
 //     target: { x: 150, y: 150 },
 //     holeInfo: { x: 20, y: 100 },
 //   });
+
 //   const [widgetSizes, setWidgetSizes] = useState<any>({});
 
 //   // Settings
 //   const [placingMode, setPlacingMode] = useState<"impact" | "landing" | null>(
 //     null
 //   );
-//   // const [tracerMode, setTracerMode] = useState<"solid" | "comet" | "hybrid">(
-//   //   "solid"
-//   // );
-//   // const [tracerColor, setTracerColor] = useState("#ff0000");
-//   // const [tracerOpacity, setTracerOpacity] = useState(0.8);
-//   // const [tracerWidth, setTracerWidth] = useState(12);
-//   // const [distanceScale, setDistanceScale] = useState(1.0);
-//   // const [holeInfoScale, setHoleInfoScale] = useState(1.0);
-//   // const [targetScale, setTargetScale] = useState(1.0);
-//   // const [showShadow, setShowShadow] = useState(true);
-//   // const [showTarget, setShowTarget] = useState(false);
-//   // const [showDistance, setShowDistance] = useState(true);
-//   // const [showHoleInfo, setShowHoleInfo] = useState(false);
-//   // const [showPlayerInfo, setShowPlayerInfo] = useState(false); // Toggle between basic hole info and Pro TV
-
-//   // // Data
-//   // const [yardage, setYardage] = useState("150");
-//   // const [unit, setUnit] = useState<"yd" | "m">("yd");
-//   // const [holeData, setHoleData] = useState({ num: "1", par: "4", dist: "420" });
-//   // const [playerData, setPlayerData] = useState({
-//   //   name: "Tiger Woods",
-//   //   score: "-2",
-//   //   shot: "1",
-//   // });
 
 //   const loadState = (key, defaultValue) => {
 //     const storedValue = localStorage.getItem(key);
@@ -581,10 +558,9 @@
 //     const vidW = video.videoWidth;
 //     const vidH = video.videoHeight;
 
-//     // --- 1. DETECT FPS WITH FALLBACK ---
+//     // --- 1. DETECT FPS ---
 //     let detectedFPS = 30;
 //     try {
-//       // Cast to 'any' because captureStream is not fully standardized in all TS libs yet
 //       const stream = (video as any).captureStream
 //         ? (video as any).captureStream()
 //         : (video as any).mozCaptureStream?.();
@@ -604,23 +580,44 @@
 
 //     const rect = containerRef.current.getBoundingClientRect();
 
+//     // --- PRELOAD IMAGES ---
 //     let targetImageObj: HTMLImageElement | null = null;
 //     let logoImageObj: HTMLImageElement | null = null;
 //     try {
-//       if (showTarget) targetImageObj = await loadImage(TargetImg);
-//       if (showPlayerInfo) logoImageObj = await loadImage(LogoImg);
+//       if (showTarget && TargetImg) targetImageObj = await loadImage(TargetImg);
+//       if (showPlayerInfo && LogoImg) logoImageObj = await loadImage(LogoImg);
 //     } catch (e) {
 //       console.warn("Could not load assets for export", e);
 //     }
 
 //     try {
-//       const canvas = document.createElement("canvas");
-//       const ctx = canvas.getContext("2d");
-//       if (!ctx) throw new Error("No 2D context available");
+//       // --- 2. PREPARE AUDIO (NEW) ---
+//       // We fetch the blob/file from the video src to decode audio
+//       let audioBuffer: AudioBuffer | null = null;
+//       let audioSampleRate = 44100;
+//       let audioNumberOfChannels = 2;
 
-//       canvas.width = vidW;
-//       canvas.height = vidH;
+//       try {
+//         console.log("Decoding audio...");
+//         const response = await fetch(video.src);
+//         const arrayBuffer = await response.arrayBuffer();
+//         const audioCtx = new (window.AudioContext ||
+//           (window as any).webkitAudioContext)();
+//         audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+//         audioSampleRate = audioBuffer.sampleRate;
+//         audioNumberOfChannels = audioBuffer.numberOfChannels;
+//         await audioCtx.close();
+//         console.log(
+//           `Audio decoded: ${audioSampleRate}Hz, ${audioNumberOfChannels} channels`
+//         );
+//       } catch (audioErr) {
+//         console.warn(
+//           "No audio track found or decode failed. Exporting silent video.",
+//           audioErr
+//         );
+//       }
 
+//       // --- 3. SETUP MUXER ---
 //       const target = new ArrayBufferTarget();
 
 //       const muxer = new Muxer({
@@ -630,16 +627,22 @@
 //           width: vidW,
 //           height: vidH,
 //         },
+//         // ADDED: Audio configuration
+//         audio: audioBuffer
+//           ? {
+//               codec: "aac",
+//               numberOfChannels: audioNumberOfChannels,
+//               sampleRate: audioSampleRate,
+//             }
+//           : undefined,
 //         fastStart: "in-memory",
 //       });
 
 //       if (typeof VideoEncoder === "undefined") {
-//         throw new Error(
-//           "WebCodecs API not supported. Use Chrome 94+, Edge 94+, or Opera 80+"
-//         );
+//         throw new Error("WebCodecs API not supported.");
 //       }
 
-//       // --- AUTO BITRATE & CODEC SELECTION ---
+//       // --- 4. VIDEO ENCODER SETUP ---
 //       const pixelCount = vidW * vidH;
 //       const bitrate = Math.max(20_000_000, Math.round(pixelCount * 5));
 
@@ -662,24 +665,15 @@
 //         }
 //       }
 
-//       console.log("Chosen codec:", chosenCodec, "Bitrate:", bitrate);
-
-//       const encoder = new VideoEncoder({
-//         output: (chunk, meta) => {
-//           try {
-//             muxer.addVideoChunk(chunk, meta);
-//           } catch (e) {
-//             console.error("Error adding chunk to muxer:", e);
-//           }
-//         },
+//       const videoEncoder = new VideoEncoder({
+//         output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
 //         error: (e) => {
-//           console.error("Encoder error:", e);
-//           alert(`Encoder error: ${e.message}`);
+//           console.error("VideoEncoder error:", e);
 //           setIsExporting(false);
 //         },
 //       });
 
-//       encoder.configure({
+//       videoEncoder.configure({
 //         codec: chosenCodec,
 //         width: vidW,
 //         height: vidH,
@@ -689,20 +683,84 @@
 //         avc: { format: "annexb" },
 //       });
 
-//       video.currentTime = 0;
-//       video.volume = 0;
+//       // --- 5. AUDIO ENCODING (NEW) ---
+//       if (audioBuffer) {
+//         const audioEncoder = new AudioEncoder({
+//           output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+//           error: (e) => console.error("AudioEncoder error", e),
+//         });
 
-//       // Ensure duration is valid
+//         audioEncoder.configure({
+//           codec: "mp4a.40.2", // AAC
+//           numberOfChannels: audioNumberOfChannels,
+//           sampleRate: audioSampleRate,
+//         });
+
+//         // Helper to interleave planar data (L,L,L,R,R,R) to (L,R,L,R,L,R)
+//         const interleave = (input: AudioBuffer) => {
+//           const length = input.length;
+//           const channels = input.numberOfChannels;
+//           const result = new Float32Array(length * channels);
+
+//           for (let i = 0; i < channels; i++) {
+//             const channelData = input.getChannelData(i);
+//             for (let j = 0; j < length; j++) {
+//               result[j * channels + i] = channelData[j];
+//             }
+//           }
+//           return result;
+//         };
+
+//         // Encode audio in chunks (e.g., 1 second per chunk to prevent UI lockup)
+//         const data = interleave(audioBuffer);
+//         const totalSamples = data.length / audioNumberOfChannels;
+//         const samplesPerChunk = audioSampleRate; // 1 second chunks
+
+//         let sampleOffset = 0;
+//         while (sampleOffset < totalSamples) {
+//           const count = Math.min(samplesPerChunk, totalSamples - sampleOffset);
+//           const chunkData = data.slice(
+//             sampleOffset * audioNumberOfChannels,
+//             (sampleOffset + count) * audioNumberOfChannels
+//           );
+
+//           const audioData = new AudioData({
+//             format: "f32", // Interleaved float32
+//             sampleRate: audioSampleRate,
+//             numberOfFrames: count,
+//             numberOfChannels: audioNumberOfChannels,
+//             timestamp: (sampleOffset / audioSampleRate) * 1_000_000,
+//             data: chunkData,
+//           });
+
+//           audioEncoder.encode(audioData);
+//           audioData.close();
+//           sampleOffset += count;
+//         }
+
+//         await audioEncoder.flush();
+//       }
+
+//       // --- 6. PREPARE CANVAS ---
+//       const canvas = document.createElement("canvas");
+//       const ctx = canvas.getContext("2d");
+//       if (!ctx) throw new Error("No 2D context available");
+//       canvas.width = vidW;
+//       canvas.height = vidH;
+
+//       // Reset video for recording
+//       video.currentTime = 0;
+//       video.volume = 0; // Keep mute during render, we encoded the audio separately
+
 //       const duration = video.duration || 1;
 //       const totalFrames = Math.ceil(duration * originalFPS);
-
-//       // *** FIX: Initialize currentFrame here ***
 //       let currentFrame = 0;
 
+//       // --- 7. PROCESS FRAMES ---
 //       const processFrame = async () => {
 //         if (currentFrame >= totalFrames) {
 //           try {
-//             await encoder.flush();
+//             await videoEncoder.flush();
 //             muxer.finalize();
 
 //             const { buffer } = target;
@@ -725,7 +783,7 @@
 //             setIsExporting(false);
 //             video.currentTime = originalTime;
 //             video.volume = originalVolume;
-//             alert("Export failed during finalization: " + (e as Error).message);
+//             alert("Export failed: " + (e as Error).message);
 //           }
 //           return;
 //         }
@@ -750,13 +808,6 @@
 //           ctx.drawImage(video, 0, 0, vidW, vidH);
 
 //           const t = video.currentTime;
-
-//           // Global opacity
-//           let globalOpacity = 1;
-//           if (landingPoint && t > landingPoint.time + 1.5) {
-//             const fadeProgress = (t - (landingPoint.time + 1.5)) / 0.5;
-//             globalOpacity = Math.max(0, 1 - fadeProgress);
-//           }
 
 //           // --- STEP 1: TARGET (behind everything) ---
 //           if (showTarget && targetImageObj) {
@@ -1548,14 +1599,12 @@
 
 //             ctx.restore();
 //           }
-
-//           // Encode frame
 //           const frame = new VideoFrame(canvas, {
 //             timestamp: currentFrame * (1_000_000 / originalFPS),
 //             duration: 1_000_000 / originalFPS,
 //           });
 
-//           encoder.encode(frame, {
+//           videoEncoder.encode(frame, {
 //             keyFrame: currentFrame % originalFPS === 0 || currentFrame === 0,
 //           });
 
@@ -1563,12 +1612,10 @@
 
 //           currentFrame++;
 //           setExportProgress(Math.round((currentFrame / totalFrames) * 100));
-
 //           setTimeout(processFrame, 0);
 //         } catch (frameError) {
 //           console.error("Frame processing error:", frameError);
 //           currentFrame++;
-//           setExportProgress(Math.round((currentFrame / totalFrames) * 100));
 //           setTimeout(processFrame, 0);
 //         }
 //       };
@@ -2298,7 +2345,7 @@
 //                 id="distance"
 //                 x={widgetPos.distance.x}
 //                 y={widgetPos.distance.y}
-//                 visible={showDistance && impactPoint && landingPoint}
+//                 visible={showDistance}
 //                 scale={distanceScale}
 //                 onDragStart={(e: any) =>
 //                   startDrag(e, "distance", widgetPos.distance)
@@ -2702,49 +2749,6 @@
 //               ))}
 //             </div>
 
-//             {/* <div className="flex items-center gap-2 mt-8 mb-8">
-//               <div className="relative w-7 h-7 rounded-full cursor-pointer">
-//                 <input
-//                   type="color"
-//                   value={tracerColor}
-//                   onChange={(e) => setTracerColor(e.target.value)}
-//                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-//                 />
-
-//                 <div className="w-7 h-7 rounded-full flex items-center justify-center relative pointer-events-none">
-//                   <div
-//                     className="w-full h-full rounded-full"
-//                     style={{
-//                       background:
-//                         "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)",
-//                     }}
-//                   />
-
-//                   <div
-//                     className="absolute w-5 h-5 rounded-full border-4"
-//                     style={{
-//                       backgroundColor: tracerColor,
-//                       boxShadow: `0 0 4px ${tracerColor}`,
-//                       borderColor: "black",
-//                     }}
-//                   />
-//                 </div>
-//               </div>
-
-//               {["#ff0000", "#fe9a00", "#165B94", "#ffffff"].map((c) => (
-//                 <button
-//                   key={c}
-//                   onClick={() => setTracerColor(c)}
-//                   className={`w-6 h-6 rounded-full border-2 transition ${
-//                     tracerColor === c
-//                       ? "border-white scale-110"
-//                       : "border-transparent"
-//                   }`}
-//                   style={{ backgroundColor: c }}
-//                 />
-//               ))}
-//             </div> */}
-
 //             <div className="relative mb-8">
 //               {/* MODAL OVERLAYS (AnimatePresence) */}
 //               <AnimatePresence>
@@ -2801,86 +2805,6 @@
 //                 )}
 //               </AnimatePresence>
 
-//               {/* <div className="flex items-center gap-4 mt-7">
-
-//                 <div className="flex items-center gap-2 bg-zinc-900 p-1.5 rounded-full border border-white/10 pr-3">
-//                   <div className="relative w-8 h-8 rounded-full cursor-pointer hover:scale-105 transition-transform">
-//                     <input
-//                       type="color"
-//                       value={tracerColor}
-//                       onChange={(e) => setTracerColor(e.target.value)}
-//                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-//                     />
-//                     <div className="w-8 h-8 rounded-full flex items-center justify-center relative pointer-events-none overflow-hidden ring-1 ring-black/50">
-//                       <div
-//                         className="w-full h-full"
-//                         style={{
-//                           background:
-//                             "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)",
-//                         }}
-//                       />
-//                       <div
-//                         className="absolute w-6 h-6 rounded-full border-4 border-black shadow-sm"
-//                         style={{ backgroundColor: tracerColor }}
-//                       />
-//                     </div>
-//                   </div>
-
-//                   <button
-//                     onClick={handleAddFavorite}
-//                     className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-//                       favorites.includes(tracerColor)
-//                         ? "bg-zinc-800 text-gray-600 cursor-default"
-//                         : "bg-amber-500 text-black hover:bg-white hover:scale-110"
-//                     }`}
-//                   >
-//                     {favorites.includes(tracerColor) ? (
-//                       <Trash2
-//                         size={16}
-//                         strokeWidth={3}
-//                         className="text-red-500"
-//                       />
-//                     ) : (
-//                       <Plus size={16} strokeWidth={3} />
-//                     )}
-//                   </button>
-//                 </div>
-
-//                 <div className="flex flex-1 gap-2 flex-wrap">
-//                   <AnimatePresence>
-//                     {favorites.map((c) => (
-//                       <motion.div
-//                         key={c}
-//                         initial={{ scale: 0, opacity: 0 }}
-//                         animate={{ scale: 1, opacity: 1 }}
-//                         exit={{ scale: 0, opacity: 0 }}
-//                         className="relative group"
-//                       >
-//                         <button
-//                           onClick={() => setTracerColor(c)}
-//                           className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
-//                             tracerColor === c
-//                               ? "border-white scale-110 ring-2 ring-white/20"
-//                               : "border-transparent hover:scale-105 hover:border-white/50"
-//                           }`}
-//                           style={{ backgroundColor: c }}
-//                         />
-//                       </motion.div>
-//                     ))}
-//                   </AnimatePresence>
-
-//                   {Array.from({
-//                     length: Math.max(0, 8 - favorites.length),
-//                   }).map((_, i) => (
-//                     <div
-//                       key={i}
-//                       className="w-8 h-8 rounded-full border border-white/5 bg-white/5 flex items-center justify-center"
-//                     >
-//                       <div className="w-1 h-1 rounded-full bg-white/10" />
-//                     </div>
-//                   ))}
-//                 </div>
-//               </div> */}
 //               <div className="flex flex-col gap-2 mt-7">
 //                 {/* First row: Color wheel and first 4 favorites */}
 //                 <div className="flex w-full items-center gap-1 justify-evenly ml-1">
@@ -3819,6 +3743,7 @@ export default function ShotTracerWeb() {
     distance: { x: 20, y: 20 },
     target: { x: 150, y: 150 },
     holeInfo: { x: 20, y: 100 },
+    playerInfo: { x: 20, y: 200 },
   });
 
   const [widgetSizes, setWidgetSizes] = useState<any>({});
@@ -3924,14 +3849,6 @@ export default function ShotTracerWeb() {
     holeData,
     playerData,
   ]);
-
-  const handleToggleInfo = () => {
-    setShowPlayerInfo(!showPlayerInfo);
-    setWidgetPos((prev) => ({
-      ...prev,
-      holeInfo: { x: 20, y: 100 }, // Reset to original position
-    }));
-  };
 
   // 'limit' = max reached, 'delete' = confirm removal
   const [colorModal, setColorModal] = useState<{
@@ -4656,8 +4573,7 @@ export default function ShotTracerWeb() {
             ctx.restore();
           }
 
-          // 2. HOLE INFO WIDGET - PERFECTED
-          if (showHoleInfo) {
+          if (showHoleInfo && !showPlayerInfo) {
             const pointScale = vidW / rect.width;
             const hx = widgetPos.holeInfo.x * pointScale;
             const hy = widgetPos.holeInfo.y * pointScale;
@@ -4666,372 +4582,379 @@ export default function ShotTracerWeb() {
             ctx.save();
             ctx.globalAlpha = globalOpacity;
 
-            if (showPlayerInfo && logoImageObj) {
-              // PRO TV GRAPHIC - PERFECTED
-              const widgetWidth = 280 * hs;
-              const topHeight = 45 * hs;
-              const dividerHeight = 2 * hs;
-              const bottomHeight = 35 * hs;
-              const totalHeight = topHeight + dividerHeight + bottomHeight;
+            // SIMPLE HOLE INFO - BALANCED & REFINED
+            const widgetWidth = 68 * hs;
+            const topHeight = 50 * hs;
+            const dividerHeight = 3 * hs;
+            const bottomHeight = 62 * hs;
+            const totalHeight = topHeight + dividerHeight + bottomHeight;
 
-              // Main container with box-shadow
-              ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
-              ctx.shadowBlur = 2 * hs;
-              ctx.shadowOffsetX = 0;
-              ctx.shadowOffsetY = 2 * hs;
+            // Outer container shadow
+            ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
+            ctx.shadowBlur = 2 * hs;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 2 * hs;
 
-              ctx.beginPath();
-              ctx.roundRect(hx, hy, widgetWidth, totalHeight, 8 * hs);
-              ctx.fillStyle = "white";
-              ctx.fill();
+            ctx.beginPath();
+            ctx.roundRect(hx, hy, widgetWidth, totalHeight, 8 * hs);
+            ctx.fillStyle = "white";
+            ctx.fill();
 
-              // Border
-              ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-              ctx.lineWidth = 2 * hs;
-              ctx.stroke();
+            // Outer subtle border (border-white/20)
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+            ctx.lineWidth = 2 * hs;
+            ctx.stroke();
 
-              ctx.shadowColor = "transparent";
+            ctx.shadowColor = "transparent";
 
-              // ─── UPPER SECTION ─────────────────────
-              ctx.fillStyle = "#165B94";
-              ctx.beginPath();
-              ctx.roundRect(hx, hy, widgetWidth, topHeight, [
-                8 * hs,
-                8 * hs,
-                0,
-                0,
-              ]);
-              ctx.fill();
+            // ─── TOP SECTION ───────────────────────
+            ctx.fillStyle = "#165B94";
+            ctx.beginPath();
+            ctx.roundRect(hx, hy, widgetWidth, topHeight, [
+              8 * hs,
+              8 * hs,
+              0,
+              0,
+            ]);
+            ctx.fill();
 
-              // Logo — moved slightly RIGHT
-              const logoSize = 23 * hs;
-              const logoX = hx + 16 * hs; // CHANGED: was 12 * hs
-              const logoY = hy + (topHeight - logoSize) / 2;
+            // Hole number
+            ctx.fillStyle = "white";
+            ctx.font = `bold ${30 * hs}px sans-serif`;
+            ctx.shadowColor = "rgba(0, 0, 0, 1)";
+            ctx.shadowBlur = 2 * hs;
+            ctx.shadowOffsetY = 1 * hs;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(
+              holeData.num,
+              hx + widgetWidth / 2,
+              hy + topHeight / 2 + 3 * hs
+            );
 
-              const tempCanvas = document.createElement("canvas");
-              tempCanvas.width = logoImageObj.width;
-              tempCanvas.height = logoImageObj.height;
-              const tempCtx = tempCanvas.getContext("2d");
-              if (tempCtx) {
-                tempCtx.filter = "brightness(0) invert(1)";
-                tempCtx.drawImage(logoImageObj, 0, 0);
-                ctx.drawImage(tempCanvas, logoX, logoY, logoSize, logoSize);
-              }
+            // ─── DIVIDER ───────────────────────────
+            const dividerY = hy + topHeight;
+            ctx.fillStyle = "#fe9A00";
+            ctx.shadowColor = "transparent";
+            ctx.fillRect(hx, dividerY, widgetWidth, dividerHeight);
 
-              // Player Name — moved DOWN slightly
-              ctx.fillStyle = "white";
-              ctx.font = `bold ${17 * hs}px sans-serif`;
-              ctx.letterSpacing = ".5";
-              ctx.shadowColor = "rgba(0, 0, 0, .8)";
-              ctx.shadowBlur = 1.75 * hs;
-              ctx.shadowOffsetY = 0.85 * hs;
-              ctx.textAlign = "left";
-              ctx.textBaseline = "middle";
+            // ─── BOTTOM SECTION ────────────────────
+            const bottomY = dividerY + dividerHeight;
+            ctx.fillStyle = "white";
+            ctx.shadowColor = "transparent";
+            ctx.beginPath();
+            ctx.roundRect(hx, bottomY, widgetWidth, bottomHeight, [
+              0,
+              0,
+              8 * hs,
+              8 * hs,
+            ]);
+            ctx.fill();
 
-              const name = playerData.name.toUpperCase();
-              const nameX = logoX + logoSize + 16 * hs;
-              const nameY = hy + topHeight / 2 + 2 * hs; // CHANGED: move name down slightly
-              const maxNameWidth = 140 * hs;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "alphabetic";
 
-              let displayName = name;
-              if (ctx.measureText(name).width > maxNameWidth) {
-                for (let i = name.length; i > 0; i--) {
-                  const testName = name.substring(0, i) + "...";
-                  if (ctx.measureText(testName).width <= maxNameWidth) {
-                    displayName = testName;
-                    break;
-                  }
-                }
-              }
-              ctx.fillText(displayName, nameX, nameY);
+            // ─── MEASURE TEXT HEIGHTS ──────────────
+            ctx.font = `900 ${16 * hs}px sans-serif`;
+            const parMetrics = ctx.measureText("Par");
+            const parHeight =
+              parMetrics.actualBoundingBoxAscent +
+              parMetrics.actualBoundingBoxDescent;
 
-              // Score Box
-              const scoreBoxWidth = 40 * hs;
-              const scoreBoxHeight = 30 * hs;
-              const scoreBoxX = hx + widgetWidth - (12 * hs + scoreBoxWidth);
-              const scoreBoxY = hy + (topHeight - scoreBoxHeight) / 2;
+            ctx.font = `700 ${16 * hs}px sans-serif`;
+            const yardMetrics = ctx.measureText("0");
+            const yardHeight =
+              yardMetrics.actualBoundingBoxAscent +
+              yardMetrics.actualBoundingBoxDescent;
 
-              ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-              ctx.beginPath();
-              ctx.roundRect(
-                scoreBoxX,
-                scoreBoxY,
-                scoreBoxWidth,
-                scoreBoxHeight,
-                4 * hs
-              );
-              ctx.fill();
+            // Remaining empty space split evenly (top / middle / bottom)
+            const freeSpace = bottomHeight - parHeight - yardHeight;
+            const gap = freeSpace / 3;
 
-              ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-              ctx.lineWidth = 1 * hs;
-              ctx.stroke();
+            // ─── PAR TEXT ──────────────────────────
+            ctx.fillStyle = "#374151";
+            ctx.font = `bold ${16 * hs}px sans-serif`;
 
-              // Score Text — moved DOWN slightly
-              ctx.fillStyle = "white";
-              ctx.font = `bold ${18 * hs}px sans-serif`;
-              ctx.shadowColor = "rgba(0, 0, 0, 1)";
-              ctx.shadowBlur = 2 * hs;
-              ctx.shadowOffsetY = 1 * hs;
-              ctx.textAlign = "center";
-              ctx.textBaseline = "middle";
-              ctx.fillText(
-                playerData.score,
-                scoreBoxX + scoreBoxWidth / 2,
-                scoreBoxY + scoreBoxHeight / 2 + 1 * hs // CHANGED
-              );
+            const parBaselineY =
+              bottomY + gap + parMetrics.actualBoundingBoxAscent;
 
-              // Divider
-              const dividerY = hy + topHeight;
-              ctx.fillStyle = "#fe9a00";
-              ctx.fillRect(hx, dividerY, widgetWidth, dividerHeight);
+            ctx.fillText(
+              `Par ${holeData.par}`,
+              hx + widgetWidth / 2,
+              parBaselineY
+            );
 
-              // ─── LOWER SECTION ─────────────────────
-              const lowerY = dividerY + dividerHeight;
-              ctx.fillStyle = "white";
-              ctx.beginPath();
-              ctx.roundRect(hx, lowerY, widgetWidth, bottomHeight, [
-                0,
-                0,
-                8 * hs,
-                8 * hs,
-              ]);
-              ctx.fill();
+            // ─── YARDAGE + UNIT ────────────────────
+            const yardFontSize = 14 * hs;
+            const unitFontSize = 10 * hs;
 
-              // Hole Number
-              ctx.fillStyle = "#000000e0";
-              ctx.font = `800 ${20 * hs}px sans-serif`;
-              ctx.shadowColor = "transparent";
+            ctx.font = `bold ${yardFontSize}px sans-serif`;
+            const yardWidth = ctx.measureText(holeData.dist).width;
 
-              ctx.textAlign = "left";
-              ctx.textBaseline = "middle";
+            ctx.font = `bold ${unitFontSize}px sans-serif`;
+            const unitWidth = ctx.measureText(unit).width;
 
-              const holeNumX = hx + 16 * hs;
-              const holeNumY = lowerY + bottomHeight / 2 + 2;
-              ctx.fillText(holeData.num, holeNumX, holeNumY);
+            const totalTextWidth = yardWidth + unitWidth;
+            const startX = hx + (widgetWidth - totalTextWidth) / 2;
 
-              ctx.fillStyle = "#4b5563";
-              ctx.textBaseline = "middle";
+            // Tighten center spacing slightly
+            const centerTighten = 2 * hs;
 
-              const yardFontSize = 15 * hs;
-              const unitFontSize = 10 * hs;
-              const unitGap = 0.75 * hs; // small gap
+            const yardBaselineY =
+              parBaselineY + parHeight + (gap - centerTighten);
 
-              // Measure yardage width
-              ctx.font = `600 ${yardFontSize}px sans-serif`;
-              const yardWidth = ctx.measureText(holeData.dist).width;
+            ctx.fillStyle = "#6b7280";
 
-              // X-position: distance from hole number
-              const distanceX =
-                holeNumX + ctx.measureText(holeData.num).width + 20 * hs;
-              const centerY = lowerY + bottomHeight / 2 + 3;
+            const unitGap = 0.9 * hs; // subtle, intentional spacing
 
-              // Draw yardage
-              ctx.fillText(holeData.dist, distanceX, centerY);
+            // Yardage
+            ctx.font = `bold ${yardFontSize}px sans-serif`;
+            ctx.fillText(holeData.dist, startX + yardWidth / 2, yardBaselineY);
 
-              // Draw unit immediately after yardage with small gap
-              // Adjust Y so smaller font visually lines up with larger font
-              ctx.font = `700 ${unitFontSize}px sans-serif`;
-              ctx.shadowColor = "transparent";
-
-              const unitY = centerY + (yardFontSize - unitFontSize) * 0.15; // tweak factor if needed
-              ctx.fillText(unit, distanceX + yardWidth + unitGap, unitY);
-
-              // ─── SHOT COUNTER ──────────────────────
-              const par = parseInt(holeData.par) || 4;
-              const currentShot = parseInt(playerData.shot) || 1;
-              const maxSlots = par;
-
-              const endNum = Math.max(par, currentShot);
-              const startNum = endNum - maxSlots + 1;
-
-              const shots = [];
-              for (let i = startNum; i <= endNum; i++) shots.push(i);
-
-              const circleRadius = 12 * hs;
-              const circleSpacing = 30 * hs; // CHANGED: bigger gap between shots
-              const rightPadding = 16 * hs;
-
-              const startX =
-                hx +
-                widgetWidth -
-                rightPadding -
-                circleRadius -
-                (shots.length - 1) * circleSpacing;
-
-              const circleY = lowerY + bottomHeight / 2;
-
-              shots.forEach((num, idx) => {
-                const circleX = startX + idx * circleSpacing;
-                const isCurrent = num === currentShot;
-
-                if (isCurrent) {
-                  ctx.fillStyle = "#165B94";
-                  ctx.beginPath();
-                  ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
-                  ctx.fill();
-
-                  ctx.fillStyle = "white";
-                  ctx.font = `bold ${12 * hs}px sans-serif`;
-                  ctx.shadowColor = "rgba(0, 0, 0, 1)";
-                  ctx.shadowBlur = 2 * hs;
-                  ctx.shadowOffsetY = 1 * hs;
-                  ctx.textAlign = "center";
-                  ctx.textBaseline = "middle";
-                  ctx.fillText(num.toString(), circleX, circleY + 0.5 * hs);
-                } else {
-                  ctx.fillStyle = "#9ca3af";
-                  ctx.font = `bold ${12 * hs}px sans-serif`;
-                  ctx.shadowColor = "transparent";
-                  ctx.textAlign = "center";
-                  ctx.textBaseline = "middle";
-                  ctx.fillText(num.toString(), circleX, circleY);
-                }
-              });
-            } else {
-              // SIMPLE HOLE INFO - BALANCED & REFINED
-              const widgetWidth = 68 * hs;
-              const topHeight = 50 * hs;
-              const dividerHeight = 3 * hs;
-              const bottomHeight = 62 * hs;
-              const totalHeight = topHeight + dividerHeight + bottomHeight;
-
-              // Outer container shadow
-              ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
-              ctx.shadowBlur = 2 * hs;
-              ctx.shadowOffsetX = 0;
-              ctx.shadowOffsetY = 2 * hs;
-
-              ctx.beginPath();
-              ctx.roundRect(hx, hy, widgetWidth, totalHeight, 8 * hs);
-              ctx.fillStyle = "white";
-              ctx.fill();
-
-              // Outer subtle border (border-white/20)
-              ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-              ctx.lineWidth = 2 * hs;
-              ctx.stroke();
-
-              ctx.shadowColor = "transparent";
-
-              // ─── TOP SECTION ───────────────────────
-              ctx.fillStyle = "#165B94";
-              ctx.beginPath();
-              ctx.roundRect(hx, hy, widgetWidth, topHeight, [
-                8 * hs,
-                8 * hs,
-                0,
-                0,
-              ]);
-              ctx.fill();
-
-              // Hole number
-              ctx.fillStyle = "white";
-              ctx.font = `bold ${30 * hs}px sans-serif`;
-              ctx.shadowColor = "rgba(0, 0, 0, 1)";
-              ctx.shadowBlur = 2 * hs;
-              ctx.shadowOffsetY = 1 * hs;
-              ctx.textAlign = "center";
-              ctx.textBaseline = "middle";
-              ctx.fillText(
-                holeData.num,
-                hx + widgetWidth / 2,
-                hy + topHeight / 2 + 3 * hs
-              );
-
-              // ─── DIVIDER ───────────────────────────
-              const dividerY = hy + topHeight;
-              ctx.fillStyle = "#fe9A00";
-              ctx.shadowColor = "transparent";
-              ctx.fillRect(hx, dividerY, widgetWidth, dividerHeight);
-
-              // ─── BOTTOM SECTION ────────────────────
-              const bottomY = dividerY + dividerHeight;
-              ctx.fillStyle = "white";
-              ctx.shadowColor = "transparent";
-              ctx.beginPath();
-              ctx.roundRect(hx, bottomY, widgetWidth, bottomHeight, [
-                0,
-                0,
-                8 * hs,
-                8 * hs,
-              ]);
-              ctx.fill();
-
-              ctx.textAlign = "center";
-              ctx.textBaseline = "alphabetic";
-
-              // ─── MEASURE TEXT HEIGHTS ──────────────
-              ctx.font = `900 ${16 * hs}px sans-serif`;
-              const parMetrics = ctx.measureText("Par");
-              const parHeight =
-                parMetrics.actualBoundingBoxAscent +
-                parMetrics.actualBoundingBoxDescent;
-
-              ctx.font = `700 ${16 * hs}px sans-serif`;
-              const yardMetrics = ctx.measureText("0");
-              const yardHeight =
-                yardMetrics.actualBoundingBoxAscent +
-                yardMetrics.actualBoundingBoxDescent;
-
-              // Remaining empty space split evenly (top / middle / bottom)
-              const freeSpace = bottomHeight - parHeight - yardHeight;
-              const gap = freeSpace / 3;
-
-              // ─── PAR TEXT ──────────────────────────
-              ctx.fillStyle = "#374151";
-              ctx.font = `bold ${16 * hs}px sans-serif`;
-
-              const parBaselineY =
-                bottomY + gap + parMetrics.actualBoundingBoxAscent;
-
-              ctx.fillText(
-                `Par ${holeData.par}`,
-                hx + widgetWidth / 2,
-                parBaselineY
-              );
-
-              // ─── YARDAGE + UNIT ────────────────────
-              const yardFontSize = 14 * hs;
-              const unitFontSize = 10 * hs;
-
-              ctx.font = `bold ${yardFontSize}px sans-serif`;
-              const yardWidth = ctx.measureText(holeData.dist).width;
-
-              ctx.font = `bold ${unitFontSize}px sans-serif`;
-              const unitWidth = ctx.measureText(unit).width;
-
-              const totalTextWidth = yardWidth + unitWidth;
-              const startX = hx + (widgetWidth - totalTextWidth) / 2;
-
-              // Tighten center spacing slightly
-              const centerTighten = 2 * hs;
-
-              const yardBaselineY =
-                parBaselineY + parHeight + (gap - centerTighten);
-
-              ctx.fillStyle = "#6b7280";
-
-              const unitGap = 0.9 * hs; // subtle, intentional spacing
-
-              // Yardage
-              ctx.font = `bold ${yardFontSize}px sans-serif`;
-              ctx.fillText(
-                holeData.dist,
-                startX + yardWidth / 2,
-                yardBaselineY
-              );
-
-              // Unit — small gap from yardage
-              ctx.font = `bold ${unitFontSize}px sans-serif`;
-              ctx.fillText(
-                unit,
-                startX + yardWidth + unitGap + unitWidth / 2,
-                yardBaselineY
-              );
-            }
+            // Unit — small gap from yardage
+            ctx.font = `bold ${unitFontSize}px sans-serif`;
+            ctx.fillText(
+              unit,
+              startX + yardWidth + unitGap + unitWidth / 2,
+              yardBaselineY
+            );
 
             ctx.restore();
           }
+
+          if (showHoleInfo && showPlayerInfo && logoImageObj) {
+            const pointScale = vidW / rect.width;
+            const hx = widgetPos.playerInfo.x * pointScale;
+            const hy = widgetPos.playerInfo.y * pointScale;
+            const hs = holeInfoScale * pointScale;
+
+            ctx.save();
+            ctx.globalAlpha = globalOpacity;
+
+            // PRO TV GRAPHIC - PERFECTED
+            const widgetWidth = 280 * hs;
+            const topHeight = 45 * hs;
+            const dividerHeight = 2 * hs;
+            const bottomHeight = 35 * hs;
+            const totalHeight = topHeight + dividerHeight + bottomHeight;
+
+            // Main container with box-shadow
+            ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
+            ctx.shadowBlur = 2 * hs;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 2 * hs;
+
+            ctx.beginPath();
+            ctx.roundRect(hx, hy, widgetWidth, totalHeight, 8 * hs);
+            ctx.fillStyle = "white";
+            ctx.fill();
+
+            // Border
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+            ctx.lineWidth = 2 * hs;
+            ctx.stroke();
+
+            ctx.shadowColor = "transparent";
+
+            // ─── UPPER SECTION ─────────────────────
+            ctx.fillStyle = "#165B94";
+            ctx.beginPath();
+            ctx.roundRect(hx, hy, widgetWidth, topHeight, [
+              8 * hs,
+              8 * hs,
+              0,
+              0,
+            ]);
+            ctx.fill();
+
+            // Logo — moved slightly RIGHT
+            const logoSize = 23 * hs;
+            const logoX = hx + 16 * hs; // CHANGED: was 12 * hs
+            const logoY = hy + (topHeight - logoSize) / 2;
+
+            const tempCanvas = document.createElement("canvas");
+            tempCanvas.width = logoImageObj.width;
+            tempCanvas.height = logoImageObj.height;
+            const tempCtx = tempCanvas.getContext("2d");
+            if (tempCtx) {
+              tempCtx.filter = "brightness(0) invert(1)";
+              tempCtx.drawImage(logoImageObj, 0, 0);
+              ctx.drawImage(tempCanvas, logoX, logoY, logoSize, logoSize);
+            }
+
+            // Player Name — moved DOWN slightly
+            ctx.fillStyle = "white";
+            ctx.font = `bold ${17 * hs}px sans-serif`;
+            ctx.letterSpacing = ".5";
+            ctx.shadowColor = "rgba(0, 0, 0, .8)";
+            ctx.shadowBlur = 1.75 * hs;
+            ctx.shadowOffsetY = 0.85 * hs;
+            ctx.textAlign = "left";
+            ctx.textBaseline = "middle";
+
+            const name = playerData.name.toUpperCase();
+            const nameX = logoX + logoSize + 16 * hs;
+            const nameY = hy + topHeight / 2 + 2 * hs; // CHANGED: move name down slightly
+            const maxNameWidth = 140 * hs;
+
+            let displayName = name;
+            if (ctx.measureText(name).width > maxNameWidth) {
+              for (let i = name.length; i > 0; i--) {
+                const testName = name.substring(0, i) + "...";
+                if (ctx.measureText(testName).width <= maxNameWidth) {
+                  displayName = testName;
+                  break;
+                }
+              }
+            }
+            ctx.fillText(displayName, nameX, nameY);
+
+            // Score Box
+            const scoreBoxWidth = 40 * hs;
+            const scoreBoxHeight = 30 * hs;
+            const scoreBoxX = hx + widgetWidth - (12 * hs + scoreBoxWidth);
+            const scoreBoxY = hy + (topHeight - scoreBoxHeight) / 2;
+
+            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+            ctx.beginPath();
+            ctx.roundRect(
+              scoreBoxX,
+              scoreBoxY,
+              scoreBoxWidth,
+              scoreBoxHeight,
+              4 * hs
+            );
+            ctx.fill();
+
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+            ctx.lineWidth = 1 * hs;
+            ctx.stroke();
+
+            // Score Text — moved DOWN slightly
+            ctx.fillStyle = "white";
+            ctx.font = `bold ${18 * hs}px sans-serif`;
+            ctx.shadowColor = "rgba(0, 0, 0, 1)";
+            ctx.shadowBlur = 2 * hs;
+            ctx.shadowOffsetY = 1 * hs;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(
+              playerData.score,
+              scoreBoxX + scoreBoxWidth / 2,
+              scoreBoxY + scoreBoxHeight / 2 + 1 * hs // CHANGED
+            );
+
+            // Divider
+            const dividerY = hy + topHeight;
+            ctx.fillStyle = "#fe9a00";
+            ctx.fillRect(hx, dividerY, widgetWidth, dividerHeight);
+
+            // ─── LOWER SECTION ─────────────────────
+            const lowerY = dividerY + dividerHeight;
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.roundRect(hx, lowerY, widgetWidth, bottomHeight, [
+              0,
+              0,
+              8 * hs,
+              8 * hs,
+            ]);
+            ctx.fill();
+
+            // Hole Number
+            ctx.fillStyle = "#000000e0";
+            ctx.font = `800 ${20 * hs}px sans-serif`;
+            ctx.shadowColor = "transparent";
+
+            ctx.textAlign = "left";
+            ctx.textBaseline = "middle";
+
+            const holeNumX = hx + 16 * hs;
+            const holeNumY = lowerY + bottomHeight / 2 + 2;
+            ctx.fillText(holeData.num, holeNumX, holeNumY);
+
+            ctx.fillStyle = "#4b5563";
+            ctx.textBaseline = "middle";
+
+            const yardFontSize = 15 * hs;
+            const unitFontSize = 10 * hs;
+            const unitGap = 0.75 * hs; // small gap
+
+            // Measure yardage width
+            ctx.font = `600 ${yardFontSize}px sans-serif`;
+            const yardWidth = ctx.measureText(holeData.dist).width;
+
+            // X-position: distance from hole number
+            const distanceX =
+              holeNumX + ctx.measureText(holeData.num).width + 20 * hs;
+            const centerY = lowerY + bottomHeight / 2 + 3;
+
+            // Draw yardage
+            ctx.fillText(holeData.dist, distanceX, centerY);
+
+            // Draw unit immediately after yardage with small gap
+            // Adjust Y so smaller font visually lines up with larger font
+            ctx.font = `700 ${unitFontSize}px sans-serif`;
+            ctx.shadowColor = "transparent";
+
+            const unitY = centerY + (yardFontSize - unitFontSize) * 0.15; // tweak factor if needed
+            ctx.fillText(unit, distanceX + yardWidth + unitGap, unitY);
+
+            // ─── SHOT COUNTER ──────────────────────
+            const par = parseInt(holeData.par) || 4;
+            const currentShot = parseInt(playerData.shot) || 1;
+            const maxSlots = par;
+
+            const endNum = Math.max(par, currentShot);
+            const startNum = endNum - maxSlots + 1;
+
+            const shots = [];
+            for (let i = startNum; i <= endNum; i++) shots.push(i);
+
+            const circleRadius = 12 * hs;
+            const circleSpacing = 30 * hs; // CHANGED: bigger gap between shots
+            const rightPadding = 16 * hs;
+
+            const startX =
+              hx +
+              widgetWidth -
+              rightPadding -
+              circleRadius -
+              (shots.length - 1) * circleSpacing;
+
+            const circleY = lowerY + bottomHeight / 2;
+
+            shots.forEach((num, idx) => {
+              const circleX = startX + idx * circleSpacing;
+              const isCurrent = num === currentShot;
+
+              if (isCurrent) {
+                ctx.fillStyle = "#165B94";
+                ctx.beginPath();
+                ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = "white";
+                ctx.font = `bold ${12 * hs}px sans-serif`;
+                ctx.shadowColor = "rgba(0, 0, 0, 1)";
+                ctx.shadowBlur = 2 * hs;
+                ctx.shadowOffsetY = 1 * hs;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(num.toString(), circleX, circleY + 0.5 * hs);
+              } else {
+                ctx.fillStyle = "#9ca3af";
+                ctx.font = `bold ${12 * hs}px sans-serif`;
+                ctx.shadowColor = "transparent";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(num.toString(), circleX, circleY);
+              }
+            });
+
+            ctx.restore();
+          }
+
           const frame = new VideoFrame(canvas, {
             timestamp: currentFrame * (1_000_000 / originalFPS),
             duration: 1_000_000 / originalFPS,
@@ -5088,36 +5011,92 @@ export default function ShotTracerWeb() {
     };
   };
 
+  // const onPointerMove = (e: React.PointerEvent) => {
+  //   if (!draggingRef.current || !containerRef.current) return;
+  //   const { type, startX, startY, initialPos } = draggingRef.current;
+  //   const deltaX = e.clientX - startX;
+  //   const deltaY = e.clientY - startY;
+  //   let newX = initialPos.x + deltaX;
+  //   let newY = initialPos.y + deltaY;
+
+  //   // Clamping
+  //   const rect = containerRef.current.getBoundingClientRect();
+  //   let objW = 0,
+  //     objH = 0;
+  //   if (["distance", "target", "holeInfo", "playerInfo"].includes(type)) {
+  //     const size = widgetSizes[type];
+  //     console.log("Widget size for", type, "is", size);
+  //     if (size) {
+  //       objW = size.w;
+  //       objH = size.h;
+  //     }
+  //   }
+  //   newX = Math.max(0, Math.min(rect.width - objW, newX));
+  //   newY = Math.max(0, Math.min(rect.height - objH, newY));
+
+  //   if (type === "impact" && impactPoint)
+  //     setImpactPoint({ ...impactPoint, x: newX, y: newY });
+  //   else if (type === "landing" && landingPoint)
+  //     setLandingPoint({ ...landingPoint, x: newX, y: newY });
+  //   else if (type === "control" && controlPoint)
+  //     setControlPoint({ x: newX, y: newY });
+  //   else if (["distance", "target", "holeInfo", "playerInfo"].includes(type)) {
+  //     setWidgetPos((prev) => ({ ...prev, [type]: { x: newX, y: newY } }));
+  //   }
+  // };
+
   const onPointerMove = (e: React.PointerEvent) => {
     if (!draggingRef.current || !containerRef.current) return;
+
     const { type, startX, startY, initialPos } = draggingRef.current;
+
     const deltaX = e.clientX - startX;
     const deltaY = e.clientY - startY;
+
     let newX = initialPos.x + deltaX;
     let newY = initialPos.y + deltaY;
 
-    // Clamping
+    // Container bounds
     const rect = containerRef.current.getBoundingClientRect();
-    let objW = 0,
-      objH = 0;
-    if (["distance", "target", "holeInfo"].includes(type)) {
+
+    let objW = 0;
+    let objH = 0;
+
+    if (["distance", "target", "holeInfo", "playerInfo"].includes(type)) {
       const size = widgetSizes[type];
+
+      // Determine scale per widget
+      let scale = 1;
+      if (type === "distance") scale = distanceScale;
+      if (type === "target") scale = targetScale;
+      if (type === "holeInfo") scale = holeInfoScale;
+      if (type === "playerInfo") scale = holeInfoScale;
+      // playerInfo defaults to 1 unless you add one later
+
       if (size) {
-        objW = size.w;
-        objH = size.h;
+        objW = size.w * scale;
+        objH = size.h * scale;
       }
     }
+
+    // Clamp with scaled size
     newX = Math.max(0, Math.min(rect.width - objW, newX));
     newY = Math.max(0, Math.min(rect.height - objH, newY));
 
-    if (type === "impact" && impactPoint)
+    // Apply position updates
+    if (type === "impact" && impactPoint) {
       setImpactPoint({ ...impactPoint, x: newX, y: newY });
-    else if (type === "landing" && landingPoint)
+    } else if (type === "landing" && landingPoint) {
       setLandingPoint({ ...landingPoint, x: newX, y: newY });
-    else if (type === "control" && controlPoint)
+    } else if (type === "control" && controlPoint) {
       setControlPoint({ x: newX, y: newY });
-    else if (["distance", "target", "holeInfo"].includes(type)) {
-      setWidgetPos((prev) => ({ ...prev, [type]: { x: newX, y: newY } }));
+    } else if (
+      ["distance", "target", "holeInfo", "playerInfo"].includes(type)
+    ) {
+      setWidgetPos((prev) => ({
+        ...prev,
+        [type]: { x: newX, y: newY },
+      }));
     }
   };
 
@@ -5778,7 +5757,7 @@ export default function ShotTracerWeb() {
                 id="distance"
                 x={widgetPos.distance.x}
                 y={widgetPos.distance.y}
-                visible={showDistance && impactPoint && landingPoint}
+                visible={showDistance}
                 scale={distanceScale}
                 onDragStart={(e: any) =>
                   startDrag(e, "distance", widgetPos.distance)
@@ -5812,53 +5791,61 @@ export default function ShotTracerWeb() {
                 id="holeInfo"
                 x={widgetPos.holeInfo.x}
                 y={widgetPos.holeInfo.y}
-                visible={showHoleInfo}
+                visible={showHoleInfo && !showPlayerInfo}
                 scale={holeInfoScale}
                 onDragStart={(e: any) =>
                   startDrag(e, "holeInfo", widgetPos.holeInfo)
                 }
                 setWidgetSize={updateWidgetSize}
               >
-                {showPlayerInfo ? (
-                  // PRO TV GRAPHIC
-                  <div className="pointer-events-auto">
-                    <PlayerInfoGraphic
-                      data={playerData}
-                      holeData={holeData}
-                      unit={unit}
-                    />
+                <div
+                  style={{ boxShadow: "0px 2px 2px 0px rgba(0,0,0,.6)" }}
+                  className="flex flex-col w-[70px] rounded-lg overflow-hidden border border-white/20 font-sans pointer-events-auto"
+                >
+                  <div className="bg-[#165B94] h-[50px] flex items-center justify-center px-2 relative">
+                    <span
+                      style={{
+                        textShadow: "0px 1.5px 1.5px rgba(0, 0, 0, 1)",
+                      }}
+                      className="text-white font-bold text-3xl"
+                    >
+                      {holeData.num}
+                    </span>
                   </div>
-                ) : (
-                  // SIMPLE HOLE INFO
-                  <div
-                    style={{ boxShadow: "0px 2px 2px 0px rgba(0,0,0,.6)" }}
-                    className="flex flex-col w-[70px] rounded-lg overflow-hidden border border-white/20 font-sans pointer-events-auto"
-                  >
-                    <div className="bg-[#165B94] h-[50px] flex items-center justify-center px-2 relative">
-                      <span
-                        style={{
-                          textShadow: "0px 1.5px 1.5px rgba(0, 0, 0, 1)",
-                        }}
-                        className="text-white font-bold text-3xl"
-                      >
-                        {holeData.num}
-                      </span>
-                    </div>
 
-                    <div className="h-[3px] bg-amber-500 w-full" />
+                  <div className="h-[3px] bg-amber-500 w-full" />
 
-                    <div className="bg-white px-2  py-2 pt-[7px] flex flex-col items-center">
-                      <span className="text-gray-700 font-bold text-md">
-                        Par {holeData.par}
-                      </span>
+                  <div className="bg-white px-2  py-2 pt-[7px] flex flex-col items-center">
+                    <span className="text-gray-700 font-bold text-md">
+                      Par {holeData.par}
+                    </span>
 
-                      <span className="text-gray-500 font-bold text-[14px] pt-[.5px]">
-                        {holeData.dist}
-                        <span className="text-[10px] ml-[.5px]">{unit}</span>
-                      </span>
-                    </div>
+                    <span className="text-gray-500 font-bold text-[14px] pt-[.5px]">
+                      {holeData.dist}
+                      <span className="text-[10px] ml-[.5px]">{unit}</span>
+                    </span>
                   </div>
-                )}
+                </div>
+              </DraggableWidget>
+
+              <DraggableWidget
+                id="playerInfo"
+                x={widgetPos.playerInfo.x}
+                y={widgetPos.playerInfo.y}
+                visible={showPlayerInfo}
+                scale={holeInfoScale}
+                onDragStart={(e: any) =>
+                  startDrag(e, "playerInfo", widgetPos.playerInfo)
+                }
+                setWidgetSize={updateWidgetSize}
+              >
+                <div className="pointer-events-auto">
+                  <PlayerInfoGraphic
+                    data={playerData}
+                    holeData={holeData}
+                    unit={unit}
+                  />
+                </div>
               </DraggableWidget>
             </motion.div>
 
@@ -6585,8 +6572,7 @@ export default function ShotTracerWeb() {
                         Player Info
                       </div>
                       <button
-                        // onClick={() => setShowPlayerInfo(!showPlayerInfo)}
-                        onClick={handleToggleInfo}
+                        onClick={() => setShowPlayerInfo(!showPlayerInfo)}
                         className={`w-8 h-4 rounded-full relative transition-colors ${
                           showPlayerInfo ? "bg-amber-500" : "bg-gray-700"
                         }`}
