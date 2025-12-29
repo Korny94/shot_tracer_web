@@ -3378,6 +3378,7 @@ import {
   AlertTriangle,
   Plus,
   AlertCircle,
+  CheckCircle,
 } from "lucide-react";
 import { CiPickerEmpty } from "react-icons/ci";
 import { SiArchicad } from "react-icons/si";
@@ -3814,6 +3815,7 @@ export default function ShotTracerWeb() {
 
   const [showFileError, setShowFileError] = useState(false);
   const [showExportFailed, setShowExportFailed] = useState(false);
+  const [showExportSuccess, setShowExportSuccess] = useState(false);
 
   const navigate = useNavigate();
 
@@ -4129,6 +4131,7 @@ export default function ShotTracerWeb() {
             setTimeout(() => URL.revokeObjectURL(url), 100);
 
             setIsExporting(false);
+            setShowExportSuccess(true);
             video.currentTime = originalTime;
             video.volume = originalVolume;
           } catch (e) {
@@ -6868,6 +6871,57 @@ export default function ShotTracerWeb() {
                         className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
                       >
                         Close
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showExportSuccess && (
+              <motion.div
+                className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {/* Click outside to close */}
+                <div
+                  className="absolute inset-0"
+                  onClick={() => setShowExportSuccess(false)}
+                />
+
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+                >
+                  {/* Glow Effect */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)]" />
+
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center mb-4 text-emerald-500 border border-emerald-500/20">
+                      <CheckCircle size={24} />
+                    </div>
+
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      Export Complete
+                    </h3>
+
+                    <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                      Your video was successfully exported and downloaded.
+                    </p>
+
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={() => setShowExportSuccess(false)}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-md bg-emerald-500 text-black hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20"
+                      >
+                        Done
                       </button>
                     </div>
                   </div>
