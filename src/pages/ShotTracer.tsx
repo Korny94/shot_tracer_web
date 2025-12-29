@@ -3813,6 +3813,7 @@ export default function ShotTracerWeb() {
   const [showExportModal, setShowExportModal] = useState(false);
 
   const [showFileError, setShowFileError] = useState(false);
+  const [showExportFailed, setShowExportFailed] = useState(false);
 
   const navigate = useNavigate();
 
@@ -4135,7 +4136,11 @@ export default function ShotTracerWeb() {
             setIsExporting(false);
             video.currentTime = originalTime;
             video.volume = originalVolume;
-            alert("Export failed: " + (e as Error).message);
+            setShowExportFailed(true);
+            // alert(
+            //   "Export failed, please try a different browser: " +
+            //     (e as Error).message
+            // );
           }
           return;
         }
@@ -4984,7 +4989,10 @@ export default function ShotTracerWeb() {
       setIsExporting(false);
       video.currentTime = originalTime;
       video.volume = originalVolume;
-      alert("Export failed: " + (e as Error).message);
+      setShowExportFailed(true);
+      // alert(
+      //   "Export failed, please try a different browser: " + (e as Error).message
+      // );
     }
   };
 
@@ -5628,7 +5636,7 @@ export default function ShotTracerWeb() {
       {/* EXPORT OVERLAY */}
       {isExporting && (
         <div className="absolute inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center">
-          <div className="w-20 h-20 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
+          <div className="w-20 h-20 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-8" />
           <h2 className="text-3xl font-bold text-white mb-2">
             Rendering Video...
           </h2>
@@ -6813,6 +6821,58 @@ export default function ShotTracerWeb() {
                   </div>
                 </motion.div>
               </div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showExportFailed && (
+              <motion.div
+                className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {/* Click outside to close */}
+                <div
+                  className="absolute inset-0"
+                  onClick={() => setShowExportFailed(false)}
+                />
+
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+                >
+                  {/* Glow Effect */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]" />
+
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4 text-red-500 border border-red-500/20">
+                      <AlertTriangle size={24} />
+                    </div>
+
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      Export Failed
+                    </h3>
+
+                    <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                      Please try again using a different browser (Chrome, Opera
+                      or Edge is recommended).
+                    </p>
+
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={() => setShowExportFailed(false)}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
