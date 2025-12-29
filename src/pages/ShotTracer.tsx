@@ -3812,6 +3812,8 @@ export default function ShotTracerWeb() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
+  const [showFileError, setShowFileError] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -5116,6 +5118,19 @@ export default function ShotTracerWeb() {
 
   // --- FILE HANDLING ---
   const onFileChange = (file: File) => {
+    const validTypes = [
+      "video/mp4",
+      "video/quicktime",
+      "video/webm",
+      "video/x-m4v",
+    ];
+
+    if (!validTypes.includes(file.type) && !file.name.endsWith(".mp4")) {
+      setShowFileError(true);
+      return;
+    }
+    setShowFileError(false);
+
     const url = URL.createObjectURL(file);
     setVideoSrc(url);
     setImpactPoint(null);
@@ -5515,53 +5530,92 @@ export default function ShotTracerWeb() {
 
   if (!videoSrc) {
     return (
-      <div
-        className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4"
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsDragOver(true);
-        }}
-        onDragLeave={() => setIsDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setIsDragOver(false);
-          if (e.dataTransfer.files?.[0]) onFileChange(e.dataTransfer.files[0]);
-        }}
-      >
-        <Link to="/">
-          <button className="absolute top-8 left-8 flex items-center gap-2 text-white transition-colors">
-            <Home size={24} className="text-amber-500" />{" "}
-            <span className="font-bold text-xl">Home</span>
-          </button>
-        </Link>
+      <>
+        <AnimatePresence>
+          {showFileError && (
+            <div className="absolute top-[50px] left-0 w-full z-99 flex justify-center pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1.3 }}
+                exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                className="bg-zinc-900 border border-white/20 shadow-2xl rounded-xl p-4 w-[260px] pointer-events-auto"
+              >
+                <div className="text-center">
+                  {/* Header */}
+                  <div className="flex items-center justify-center gap-2 text-amber-500 font-bold mb-2">
+                    <AlertTriangle size={16} />
+                    <span>Unsupported Format</span>
+                  </div>
 
-        <div
-          className={`max-w-md w-full bg-zinc-900 border-2 border-dashed rounded-3xl p-10 text-center shadow-2xl transition-all ${
-            isDragOver ? "border-amber-500 bg-amber-500/10" : "border-white/10"
-          }`}
-        >
-          <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-500/20">
-            <Upload size={32} className="text-amber-500" />
-          </div>
-          <h1 className="text-3xl font-bold mb-2">Shot Tracer Studio</h1>
-          <p className="text-gray-400 mb-8">
-            Drag & drop or select a video to start.
-          </p>
-          <label className="block w-full cursor-pointer group">
-            <input
-              type="file"
-              accept="video/*"
-              onChange={(e) =>
-                e.target.files?.[0] && onFileChange(e.target.files[0])
-              }
-              className="hidden"
-            />
-            <div className="w-full bg-amber-500 group-hover:bg-white text-black font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-              Select Video
+                  {/* Body Text */}
+                  <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+                    Browser does not support this format <br />
+                    Please use .MP4, .MOV or .WebM.
+                  </p>
+
+                  {/* Action Button */}
+                  <button
+                    onClick={() => setShowFileError(false)}
+                    className="w-full py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded text-xs font-bold text-white transition-colors border border-white/5"
+                  >
+                    Got it
+                  </button>
+                </div>
+              </motion.div>
             </div>
-          </label>
+          )}
+        </AnimatePresence>
+        <div
+          className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4"
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragOver(true);
+          }}
+          onDragLeave={() => setIsDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragOver(false);
+            if (e.dataTransfer.files?.[0])
+              onFileChange(e.dataTransfer.files[0]);
+          }}
+        >
+          <Link to="/">
+            <button className="absolute top-8 left-8 flex items-center gap-2 text-white transition-colors">
+              <Home size={24} className="text-amber-500" />{" "}
+              <span className="font-bold text-xl">Home</span>
+            </button>
+          </Link>
+
+          <div
+            className={`max-w-md w-full bg-zinc-900 border-2 border-dashed rounded-3xl p-10 text-center shadow-2xl transition-all ${
+              isDragOver
+                ? "border-amber-500 bg-amber-500/10"
+                : "border-white/10"
+            }`}
+          >
+            <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-500/20">
+              <Upload size={32} className="text-amber-500" />
+            </div>
+            <h1 className="text-3xl font-bold mb-2">Shot Tracer Studio</h1>
+            <p className="text-gray-400 mb-8">
+              Drag & drop or select a video to start.
+            </p>
+            <label className="block w-full cursor-pointer group">
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(e) =>
+                  e.target.files?.[0] && onFileChange(e.target.files[0])
+                }
+                className="hidden"
+              />
+              <div className="w-full bg-amber-500 group-hover:bg-white text-black font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+                Select Video
+              </div>
+            </label>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
