@@ -5024,40 +5024,6 @@ export default function ShotTracerWeb() {
     };
   };
 
-  // const onPointerMove = (e: React.PointerEvent) => {
-  //   if (!draggingRef.current || !containerRef.current) return;
-  //   const { type, startX, startY, initialPos } = draggingRef.current;
-  //   const deltaX = e.clientX - startX;
-  //   const deltaY = e.clientY - startY;
-  //   let newX = initialPos.x + deltaX;
-  //   let newY = initialPos.y + deltaY;
-
-  //   // Clamping
-  //   const rect = containerRef.current.getBoundingClientRect();
-  //   let objW = 0,
-  //     objH = 0;
-  //   if (["distance", "target", "holeInfo", "playerInfo"].includes(type)) {
-  //     const size = widgetSizes[type];
-  //     console.log("Widget size for", type, "is", size);
-  //     if (size) {
-  //       objW = size.w;
-  //       objH = size.h;
-  //     }
-  //   }
-  //   newX = Math.max(0, Math.min(rect.width - objW, newX));
-  //   newY = Math.max(0, Math.min(rect.height - objH, newY));
-
-  //   if (type === "impact" && impactPoint)
-  //     setImpactPoint({ ...impactPoint, x: newX, y: newY });
-  //   else if (type === "landing" && landingPoint)
-  //     setLandingPoint({ ...landingPoint, x: newX, y: newY });
-  //   else if (type === "control" && controlPoint)
-  //     setControlPoint({ x: newX, y: newY });
-  //   else if (["distance", "target", "holeInfo", "playerInfo"].includes(type)) {
-  //     setWidgetPos((prev) => ({ ...prev, [type]: { x: newX, y: newY } }));
-  //   }
-  // };
-
   const onPointerMove = (e: React.PointerEvent) => {
     if (!draggingRef.current || !containerRef.current) return;
 
@@ -6761,7 +6727,10 @@ export default function ShotTracerWeb() {
           <div className="w-full h-px bg-white/5" />
 
           <button
-            onClick={() => setShowExportModal(true)}
+            onClick={() => {
+              setCurrentTime(0);
+              setShowExportModal(true);
+            }}
             disabled={isExporting}
             className="w-full bg-[#165B94] bg-amber-500 hover:bg-white text-black font-bold py-3 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -6921,7 +6890,7 @@ export default function ShotTracerWeb() {
                         onClick={() => setShowExportSuccess(false)}
                         className="flex-1 py-3 px-4 rounded-xl font-bold text-md bg-emerald-500 text-black hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20"
                       >
-                        Done
+                        Great!
                       </button>
                     </div>
                   </div>
