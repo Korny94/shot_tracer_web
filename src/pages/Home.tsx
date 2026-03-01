@@ -299,9 +299,9 @@ const Home = () => {
         {/* Content */}
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-600">
-            MASTER YOUR <br />
+            SHOT TRACER <br />
             <span className=" drop-shadow-[0_0_15px_rgba(245,158,11,0.4)] text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">
-              GAME
+              FREE
             </span>
           </h1>
           {/* <h1
@@ -313,9 +313,12 @@ const Home = () => {
               BOGEY
             </span>
           </h1> */}
-          <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
+          {/* <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
             The all-in-one golf ecosystem. 42,000+ courses, advanced analytics,
             and the revolutionary new Shot Tracer.
+          </p> */}
+          <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
+            Add Shot Tracers to Your Golf Videos in Minutes
           </p>
           <div className="flex flex-col md:flex-row gap-4 justify-center">
             {/* <Link
@@ -341,7 +344,7 @@ const Home = () => {
               onClick={() =>
                 window.open(
                   "https://play.google.com/store/apps/details?id=com.rbkorny.maxbogeyapp",
-                  "_blank"
+                  "_blank",
                 )
               }
               className="px-8 py-4 bg-transparent border border-gray-600 text-white font-bold rounded-full hover:border-white hover:bg-white/5 transition-all"
@@ -409,10 +412,11 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              THE FULL ARSENAL
+              MAXBOGEY GOLF APP
             </h2>
             <p className="text-gray-500">
-              Everything you need. Nothing you don't.
+              Everything you need. Nothing you don't. On Android and coming soon
+              to iOS.
             </p>
           </div>
 
