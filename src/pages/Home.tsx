@@ -318,7 +318,7 @@ const Home = () => {
             and the revolutionary new Shot Tracer.
           </p> */}
           <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-            Add Shot Tracers to Your Golf Videos in Minutes
+            Add Shot Tracers to Your Golf Videos in Seconds
           </p>
           <div className="flex flex-col md:flex-row gap-4 justify-center">
             {/* <Link
@@ -337,7 +337,7 @@ const Home = () => {
               }}
               className="px-8 py-4 bg-amber-500 text-black font-bold rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:shadow-[0_0_30px_rgba(255,255,255,0.6)]"
             >
-              TRY SHOT TRACER
+              TRY NOW
             </button>
 
             <button
