@@ -10,7 +10,6 @@ import ContactPage from "./pages/ContactPage";
 import FAQPage from "./pages/FAQPage";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
-import CookieConsent from "./components/CookieConsent";
 import "./index.css";
 
 const App = () => {
@@ -39,9 +38,6 @@ const App = () => {
 
       {!isShotTracer && <Footer />}
       {!isShotTracer && <ScrollToTop />}
-
-      {/* GDPR cookie consent — gates Google Analytics until the visitor accepts */}
-      <CookieConsent />
     </div>
   );
 };

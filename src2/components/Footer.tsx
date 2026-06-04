@@ -96,16 +96,6 @@ const Footer = () => {
                   Privacy Policy
                 </Link>
               </li>
-              <li>
-                <button
-                  onClick={() =>
-                    window.dispatchEvent(new Event("open-cookie-settings"))
-                  }
-                  className="hover:text-amber-500 transition-colors"
-                >
-                  Cookie Settings
-                </button>
-              </li>
             </ul>
           </div>
           <div>

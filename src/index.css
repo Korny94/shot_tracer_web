@@ -3,3 +3,25 @@
 button {
   cursor: pointer;
 }
+
+/* Floating bob for the target graphic (replaces framer-motion y animation). */
+@keyframes mb-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.mb-float {
+  animation: mb-float 2s ease-in-out infinite;
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .mb-float {
+    animation: none;
+  }
+}

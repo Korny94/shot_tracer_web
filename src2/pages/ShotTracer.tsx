@@ -5,8 +5,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import Modal from "../components/Modal";
-import TutorialVideo from "../components/TutorialVideo";
+import { AnimatePresence, motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
 import {
@@ -31,8 +30,6 @@ import {
   Plus,
   AlertCircle,
   CheckCircle,
-  PlayCircle,
-  X,
 } from "lucide-react";
 import { CiPickerEmpty } from "react-icons/ci";
 import { SiArchicad } from "react-icons/si";
@@ -50,15 +47,6 @@ const loadImage = (src: string): Promise<HTMLImageElement> => {
     img.onerror = (e) => reject(e);
     img.src = src;
   });
-};
-
-// Fallback (unscaled) widget sizes — used the first time a widget is shown,
-// before it has reported its real measured size. Keeps centering accurate.
-const WIDGET_FALLBACK_SIZE: Record<string, { w: number; h: number }> = {
-  distance: { w: 90, h: 55 },
-  target: { w: 35, h: 35 },
-  holeInfo: { w: 70, h: 115 },
-  playerInfo: { w: 280, h: 82 },
 };
 
 // --- MATH & GEOMETRY ENGINE ---
@@ -257,42 +245,7 @@ const VirtualJoystick = ({
 }: {
   onMove: (dx: number, dy: number) => void;
 }) => {
-  // Native pointer-event joystick (replaces framer-motion drag). The stick
-  // follows the pointer within a small radius, reports the per-move delta
-  // (x3, matching the previous behaviour), and snaps back to center on release.
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const dragging = useRef(false);
-  const last = useRef({ x: 0, y: 0 });
-  const MAX_OFFSET = 26;
-
-  const handleDown = (e: React.PointerEvent) => {
-    dragging.current = true;
-    last.current = { x: e.clientX, y: e.clientY };
-    e.currentTarget.setPointerCapture(e.pointerId);
-  };
-
-  const handleMove = (e: React.PointerEvent) => {
-    if (!dragging.current) return;
-    const dx = e.clientX - last.current.x;
-    const dy = e.clientY - last.current.y;
-    last.current = { x: e.clientX, y: e.clientY };
-    onMove(dx * 3, dy * 3);
-    setOffset((p) => ({
-      x: Math.max(-MAX_OFFSET, Math.min(MAX_OFFSET, p.x + dx)),
-      y: Math.max(-MAX_OFFSET, Math.min(MAX_OFFSET, p.y + dy)),
-    }));
-  };
-
-  const handleUp = (e: React.PointerEvent) => {
-    dragging.current = false;
-    setOffset({ x: 0, y: 0 });
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {
-      /* pointer already released */
-    }
-  };
-
+  const stickRef = useRef(null);
   return (
     <div className="w-full aspect-square bg-zinc-900 rounded-xl border border-white/10 relative flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/5 to-transparent pointer-events-none" />
@@ -303,22 +256,20 @@ const VirtualJoystick = ({
         <div className=""></div>
       </div>
       <span className="absolute top-4 text-[12px] text-white/75 font-bold uppercase tracking-widest pointer-events-none flex items-center gap-2">
+        {/* <SiArchicad size={14} className="text-amber-500" /> */}
+        {/* Drag joystick */}
         Shot shape
       </span>
-      <div
-        onPointerDown={handleDown}
-        onPointerMove={handleMove}
-        onPointerUp={handleUp}
-        onPointerCancel={handleUp}
-        style={{
-          transform: `translate(${offset.x}px, ${offset.y}px)`,
-          transition: dragging.current ? "none" : "transform 0.2s ease-out",
-          touchAction: "none",
-        }}
-        className="w-12 h-12 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)] z-10 cursor-move active:cursor-grabbing flex items-center justify-center select-none"
+      <motion.div
+        ref={stickRef}
+        drag
+        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+        dragElastic={0.1}
+        onDrag={(_, info) => onMove(info.delta.x * 3, info.delta.y * 3)}
+        className="w-12 h-12 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)] z-10 cursor-move active:cursor-grabbing flex items-center justify-center"
       >
         <BsJoystick size={20} className="text-black" />
-      </div>
+      </motion.div>
     </div>
   );
 };
@@ -328,12 +279,10 @@ const PlayerInfoGraphic = ({
   data,
   holeData,
   unit,
-  showHole = true,
 }: {
   data: { name: string; score: string; shot: string };
   holeData: { num: string; par: string; dist: string };
   unit: string;
-  showHole?: boolean;
 }) => {
   // Logic for shot counter
   const par = parseInt(holeData.par) || 4;
@@ -393,20 +342,16 @@ const PlayerInfoGraphic = ({
       {/* Lower Section */}
       <div className="bg-white h-[35px] flex items-center px-4 justify-between">
         <div className="flex items-center gap-4">
-          {showHole && (
-            <>
-              <span
-                style={{ opacity: 0.8 }}
-                className="text-black font-black text-xl mb-1"
-              >
-                {holeData.num}
-              </span>
-              <span className="text-gray-600 font-bold text-m">
-                {holeData.dist}
-                <span className="text-[12px]">{unit}</span>
-              </span>
-            </>
-          )}
+          <span
+            style={{ opacity: 0.8 }}
+            className="text-black font-black text-xl mb-1"
+          >
+            {holeData.num}
+          </span>
+          <span className="text-gray-600 font-bold text-m">
+            {holeData.dist}
+            <span className="text-[12px]">{unit}</span>
+          </span>
         </div>
 
         {/* Shot Counter */}
@@ -470,23 +415,12 @@ export default function ShotTracerWeb() {
     y: number;
   } | null>(null);
 
-  // Widgets — positions persist across uploads and browser sessions, so a
-  // graphic stays exactly where it was last placed (it only re-centers when
-  // toggled off→on, or when it no longer fits the current video; see below).
-  const [widgetPos, setWidgetPos] = useState(() => {
-    const fallback = {
-      distance: { x: 20, y: 20 },
-      target: { x: 150, y: 150 },
-      holeInfo: { x: 20, y: 100 },
-      playerInfo: { x: 20, y: 200 },
-    };
-    try {
-      const stored = localStorage.getItem("widgetPos");
-      if (stored) return { ...fallback, ...JSON.parse(stored) };
-    } catch {
-      /* ignore malformed/blocked storage */
-    }
-    return fallback;
+  // Widgets
+  const [widgetPos, setWidgetPos] = useState({
+    distance: { x: 20, y: 20 },
+    target: { x: 150, y: 150 },
+    holeInfo: { x: 20, y: 100 },
+    playerInfo: { x: 20, y: 200 },
   });
 
   const [widgetSizes, setWidgetSizes] = useState<any>({});
@@ -558,7 +492,6 @@ export default function ShotTracerWeb() {
   const [showFileError, setShowFileError] = useState(false);
   const [showExportFailed, setShowExportFailed] = useState(false);
   const [showExportSuccess, setShowExportSuccess] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(false);
 
   const navigate = useNavigate();
 
@@ -1534,7 +1467,7 @@ export default function ShotTracerWeb() {
             ctx.restore();
           }
 
-          if (showPlayerInfo && logoImageObj) {
+          if (showHoleInfo && showPlayerInfo && logoImageObj) {
             const pointScale = vidW / rect.width;
             const hx = widgetPos.playerInfo.x * pointScale;
             const hy = widgetPos.playerInfo.y * pointScale;
@@ -1673,47 +1606,44 @@ export default function ShotTracerWeb() {
             ]);
             ctx.fill();
 
-            // Hole Number + distance (only drawn when Hole Info is enabled,
-            // so Hole Info can be hidden independently of Player Info).
-            if (showHoleInfo) {
-              ctx.fillStyle = "#000000e0";
-              ctx.font = `800 ${20 * hs}px sans-serif`;
-              ctx.shadowColor = "transparent";
+            // Hole Number
+            ctx.fillStyle = "#000000e0";
+            ctx.font = `800 ${20 * hs}px sans-serif`;
+            ctx.shadowColor = "transparent";
 
-              ctx.textAlign = "left";
-              ctx.textBaseline = "middle";
+            ctx.textAlign = "left";
+            ctx.textBaseline = "middle";
 
-              const holeNumX = hx + 16 * hs;
-              const holeNumY = lowerY + bottomHeight / 2 + 2;
-              ctx.fillText(holeData.num, holeNumX, holeNumY);
+            const holeNumX = hx + 16 * hs;
+            const holeNumY = lowerY + bottomHeight / 2 + 2;
+            ctx.fillText(holeData.num, holeNumX, holeNumY);
 
-              ctx.fillStyle = "#4b5563";
-              ctx.textBaseline = "middle";
+            ctx.fillStyle = "#4b5563";
+            ctx.textBaseline = "middle";
 
-              const yardFontSize = 15 * hs;
-              const unitFontSize = 10 * hs;
-              const unitGap = 0.75 * hs; // small gap
+            const yardFontSize = 15 * hs;
+            const unitFontSize = 10 * hs;
+            const unitGap = 0.75 * hs; // small gap
 
-              // Measure yardage width
-              ctx.font = `600 ${yardFontSize}px sans-serif`;
-              const yardWidth = ctx.measureText(holeData.dist).width;
+            // Measure yardage width
+            ctx.font = `600 ${yardFontSize}px sans-serif`;
+            const yardWidth = ctx.measureText(holeData.dist).width;
 
-              // X-position: distance from hole number
-              const distanceX =
-                holeNumX + ctx.measureText(holeData.num).width + 20 * hs;
-              const centerY = lowerY + bottomHeight / 2 + 3;
+            // X-position: distance from hole number
+            const distanceX =
+              holeNumX + ctx.measureText(holeData.num).width + 20 * hs;
+            const centerY = lowerY + bottomHeight / 2 + 3;
 
-              // Draw yardage
-              ctx.fillText(holeData.dist, distanceX, centerY);
+            // Draw yardage
+            ctx.fillText(holeData.dist, distanceX, centerY);
 
-              // Draw unit immediately after yardage with small gap
-              // Adjust Y so smaller font visually lines up with larger font
-              ctx.font = `700 ${unitFontSize}px sans-serif`;
-              ctx.shadowColor = "transparent";
+            // Draw unit immediately after yardage with small gap
+            // Adjust Y so smaller font visually lines up with larger font
+            ctx.font = `700 ${unitFontSize}px sans-serif`;
+            ctx.shadowColor = "transparent";
 
-              const unitY = centerY + (yardFontSize - unitFontSize) * 0.15; // tweak factor if needed
-              ctx.fillText(unit, distanceX + yardWidth + unitGap, unitY);
-            }
+            const unitY = centerY + (yardFontSize - unitFontSize) * 0.15; // tweak factor if needed
+            ctx.fillText(unit, distanceX + yardWidth + unitGap, unitY);
 
             // ─── SHOT COUNTER ──────────────────────
             const par = parseInt(holeData.par) || 4;
@@ -1893,143 +1823,12 @@ export default function ShotTracerWeb() {
     }
   };
 
-  // Keep latest sizes/scales in refs so the helpers below can stay stable
-  // (no stale closures) without re-creating on every render.
-  const widgetSizesRef = useRef<any>(widgetSizes);
-  widgetSizesRef.current = widgetSizes;
-
-  const scalesRef = useRef<Record<string, number>>({});
-  scalesRef.current = {
-    distance: distanceScale,
-    target: targetScale,
-    holeInfo: holeInfoScale,
-    playerInfo: holeInfoScale,
-  };
-
-  // Widgets awaiting a precise re-center once their real size is measured.
-  const pendingCenterRef = useRef<Set<string>>(new Set());
-
-  const computeCenter = (w: number, h: number, rect: DOMRect) => ({
-    x: Math.max(0, (rect.width - w) / 2),
-    y: Math.max(0, (rect.height - h) / 2),
-  });
-
-  // Place a widget in the middle of the video container.
-  const centerWidget = useCallback((type: string) => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    const scale = scalesRef.current[type] ?? 1;
-    const known = widgetSizesRef.current[type];
-    const size = known || WIDGET_FALLBACK_SIZE[type] || { w: 0, h: 0 };
-
-    if (rect && rect.width > 0) {
-      const pos = computeCenter(size.w * scale, size.h * scale, rect);
-      setWidgetPos((prev) => ({ ...prev, [type]: pos }));
-    }
-    // If we only had an estimate, refine once the real size is measured.
-    if (!known) pendingCenterRef.current.add(type);
-  }, []);
-
   const updateWidgetSize = useCallback((id: string, w: number, h: number) => {
     setWidgetSizes((prev: any) => {
       if (prev[id]?.w === w && prev[id]?.h === h) return prev;
       return { ...prev, [id]: { w, h } };
     });
-
-    // Finish a centering that was started before this widget had a real size.
-    if (pendingCenterRef.current.has(id)) {
-      pendingCenterRef.current.delete(id);
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (rect && rect.width > 0) {
-        const scale = scalesRef.current[id] ?? 1;
-        const pos = computeCenter(w * scale, h * scale, rect);
-        setWidgetPos((prev) => ({ ...prev, [id]: pos }));
-      }
-    }
   }, []);
-
-  // Persist widget positions so a graphic stays exactly where it was last
-  // placed — across new uploads and across browser sessions.
-  useEffect(() => {
-    try {
-      localStorage.setItem("widgetPos", JSON.stringify(widgetPos));
-    } catch {
-      /* storage blocked */
-    }
-  }, [widgetPos]);
-
-  // A graphic only moves on its own if it no longer FITS the current video
-  // (e.g. a corner placement from a 16:9 clip when a 9:16 clip is loaded). In
-  // that case it re-centers; if it still fits, it is left exactly where it was.
-  const recenterIfOutOfBounds = useCallback(() => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect || rect.width === 0 || rect.height === 0) return;
-    setWidgetPos((prev) => {
-      let changed = false;
-      const next: any = { ...prev };
-      (["distance", "target", "holeInfo", "playerInfo"] as const).forEach(
-        (type) => {
-          const scale = scalesRef.current[type] ?? 1;
-          const size =
-            widgetSizesRef.current[type] || WIDGET_FALLBACK_SIZE[type];
-          const w = size.w * scale;
-          const h = size.h * scale;
-          const p = prev[type];
-          const fits =
-            p.x >= 0 &&
-            p.y >= 0 &&
-            p.x <= rect.width - w &&
-            p.y <= rect.height - h;
-          if (!fits) {
-            const c = computeCenter(w, h, rect);
-            if (c.x !== p.x || c.y !== p.y) {
-              next[type] = c;
-              changed = true;
-            }
-          }
-        },
-      );
-      return changed ? next : prev;
-    });
-  }, []);
-
-  // Validate positions when a new video's dimensions become known (aspect ratio
-  // finalised) and on window resize — waiting a frame so the container has taken
-  // its new size before we measure.
-  useEffect(() => {
-    if (!videoDims.w) return;
-    const id = requestAnimationFrame(() => recenterIfOutOfBounds());
-    return () => cancelAnimationFrame(id);
-  }, [videoDims, recenterIfOutOfBounds]);
-
-  useEffect(() => {
-    const onResize = () => recenterIfOutOfBounds();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [recenterIfOutOfBounds]);
-
-  // When a graphic is toggled OFF then ON again, re-center it (rather than
-  // leaving it where it was last dropped). Rising-edge detection only, so it
-  // never disturbs positions on first load.
-  const prevVisRef = useRef({
-    distance: showDistance,
-    target: showTarget,
-    holeCard: showHoleInfo && !showPlayerInfo,
-    player: showPlayerInfo,
-  });
-  useEffect(() => {
-    const cur = {
-      distance: showDistance,
-      target: showTarget,
-      holeCard: showHoleInfo && !showPlayerInfo,
-      player: showPlayerInfo,
-    };
-    const prev = prevVisRef.current;
-    if (cur.distance && !prev.distance) centerWidget("distance");
-    if (cur.target && !prev.target) centerWidget("target");
-    if (cur.holeCard && !prev.holeCard) centerWidget("holeInfo");
-    if (cur.player && !prev.player) centerWidget("playerInfo");
-    prevVisRef.current = cur;
-  }, [showDistance, showTarget, showHoleInfo, showPlayerInfo, centerWidget]);
 
   // --- FILE HANDLING ---
   const onFileChange = (file: File) => {
@@ -2485,10 +2284,14 @@ export default function ShotTracerWeb() {
   if (!videoSrc) {
     return (
       <>
-        {showFileError && (
+        <AnimatePresence>
+          {showFileError && (
             <div className="absolute top-[50px] left-0 w-full z-99 flex justify-center pointer-events-none">
-              <div
-                className="bg-zinc-900 border border-white/20 shadow-2xl rounded-xl p-4 w-[260px] pointer-events-auto animate-in fade-in zoom-in slide-in-from-top-2 duration-300"
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1.3 }}
+                exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                className="bg-zinc-900 border border-white/20 shadow-2xl rounded-xl p-4 w-[260px] pointer-events-auto"
               >
                 <div className="text-center">
                   {/* Header */}
@@ -2511,9 +2314,10 @@ export default function ShotTracerWeb() {
                     Got it
                   </button>
                 </div>
-              </div>
+              </motion.div>
             </div>
           )}
+        </AnimatePresence>
         <div
           className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4"
           onDragOver={(e) => {
@@ -2562,34 +2366,8 @@ export default function ShotTracerWeb() {
                 Select Video
               </div>
             </label>
-
-            <button
-              onClick={() => setShowTutorial(true)}
-              className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-amber-500 transition-colors"
-            >
-              <PlayCircle size={18} className="text-amber-500" />
-              Watch the tutorial
-            </button>
           </div>
         </div>
-
-        <Modal
-          open={showTutorial}
-          onClose={() => setShowTutorial(false)}
-          maxWidth="max-w-3xl"
-          label="Shot Tracer tutorial video"
-        >
-          <div className="relative">
-            <button
-              onClick={() => setShowTutorial(false)}
-              aria-label="Close tutorial"
-              className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-zinc-900 border border-white/10 text-white flex items-center justify-center hover:bg-zinc-800 transition-colors shadow-lg"
-            >
-              <X size={18} />
-            </button>
-            <TutorialVideo title="How to add shot tracers to your golf videos" />
-          </div>
-        </Modal>
       </>
     );
   }
@@ -2645,12 +2423,10 @@ export default function ShotTracerWeb() {
               </div>
             )}
 
-            <div
+            <motion.div
               className="absolute inset-0 pointer-events-none z-5"
-              style={{
-                opacity: globalOpacity,
-                transition: "opacity 0.2s ease-out",
-              }}
+              animate={{ opacity: globalOpacity }}
+              transition={{ duration: 0.2 }}
             >
               <svg
                 ref={svgRef}
@@ -2875,18 +2651,15 @@ export default function ShotTracerWeb() {
                     data={playerData}
                     holeData={holeData}
                     unit={unit}
-                    showHole={showHoleInfo}
                   />
                 </div>
               </DraggableWidget>
-            </div>
+            </motion.div>
 
-            <div
+            <motion.div
               className="absolute inset-0 pointer-events-none z-1"
-              style={{
-                opacity: globalOpacity,
-                transition: "opacity 0.2s ease-out",
-              }}
+              animate={{ opacity: globalOpacity }}
+              transition={{ duration: 0.2 }}
             >
               <DraggableWidget
                 id="target"
@@ -2899,17 +2672,18 @@ export default function ShotTracerWeb() {
                 }
                 setWidgetSize={updateWidgetSize}
               >
-                <div
-                  className="mb-float filter drop-shadow-lg pointer-events-auto"
-                  style={{
-                    opacity: targetOpacity,
-                    transition: "opacity 0.3s ease-out",
+                <motion.div
+                  animate={{ y: [0, -10, 0], opacity: targetOpacity }}
+                  transition={{
+                    y: { repeat: Infinity, duration: 2, ease: "easeInOut" },
+                    opacity: { duration: 0.3 },
                   }}
+                  className="filter drop-shadow-lg pointer-events-auto"
                 >
                   <img style={{ width: 35 }} src={TargetImg} alt="Target" />
-                </div>
+                </motion.div>
               </DraggableWidget>
-            </div>
+            </motion.div>
 
             {/* CONTROL POINTS (Hidden during export) */}
             {!isExporting && impactPoint && (
@@ -3038,45 +2812,56 @@ export default function ShotTracerWeb() {
               <Home size={20} className="text-amber-500" />
             </button>
 
-            <Modal
-              open={showHomeModal}
-              onClose={() => setShowHomeModal(false)}
-              label="Return to home confirmation"
-            >
-              <div className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full shadow-2xl overflow-hidden">
-                {/* Glow Effect */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]" />
+            <AnimatePresence>
+              {showHomeModal && (
+                <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                  {/* Click outside to close */}
+                  <div
+                    className="absolute inset-0"
+                    onClick={() => setShowHomeModal(false)}
+                  />
 
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mb-4 text-amber-500 border border-amber-500/20">
-                    <AlertTriangle size={24} />
-                  </div>
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.95, opacity: 0 }}
+                    className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+                  >
+                    {/* Glow Effect */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]" />
 
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    Return to Home?
-                  </h3>
-                  <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                    Are you sure you want to leave the studio? Any unsaved
-                    progress on your tracer will be lost.
-                  </p>
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mb-4 text-amber-500 border border-amber-500/20">
+                        <AlertTriangle size={24} />
+                      </div>
 
-                  <div className="flex gap-3 w-full">
-                    <button
-                      onClick={() => setShowHomeModal(false)}
-                      className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => navigate("/")}
-                      className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-amber-500 text-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
-                    >
-                      Yes, Leave
-                    </button>
-                  </div>
+                      <h3 className="text-xl font-bold text-white mb-2">
+                        Return to Home?
+                      </h3>
+                      <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                        Are you sure you want to leave the studio? Any unsaved
+                        progress on your tracer will be lost.
+                      </p>
+
+                      <div className="flex gap-3 w-full">
+                        <button
+                          onClick={() => setShowHomeModal(false)}
+                          className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => navigate("/")}
+                          className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-amber-500 text-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
+                        >
+                          Yes, Leave
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
-              </div>
-            </Modal>
+              )}
+            </AnimatePresence>
             <h2 className="text-base font-bold text-white tracking-wide text-lg">
               Shot Tracer Studio
             </h2>
@@ -3089,58 +2874,60 @@ export default function ShotTracerWeb() {
             <Trash2 size={18} />
           </button>
 
-          <Modal
-            open={showDeleteModal}
-            onClose={() => setShowDeleteModal(false)}
-            label="Delete video confirmation"
-          >
-            <div className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full shadow-2xl overflow-hidden">
-              {/* Glow Effect */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]" />
+          <AnimatePresence>
+            {showDeleteModal && (
+              <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                {/* Click outside to close */}
+                <div
+                  className="absolute inset-0"
+                  onClick={() => setShowDeleteModal(false)}
+                />
 
-              <div className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4 text-red-500 border border-red-500/20">
-                  <Trash2 size={24} />
-                </div>
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+                >
+                  {/* Glow Effect */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]" />
 
-                <h3 className="text-xl font-bold text-white mb-2">
-                  Delete Video?
-                </h3>
-                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                  Are you sure you want to delete this video? Any unsaved
-                  progress on your tracer will be lost.
-                </p>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4 text-red-500 border border-red-500/20">
+                      <Trash2 size={24} />
+                    </div>
 
-                <div className="flex gap-3 w-full">
-                  <button
-                    onClick={() => setShowDeleteModal(false)}
-                    className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      setVideoSrc(null);
-                      setShowDeleteModal(false);
-                    }}
-                    className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-red-500 text-white hover:bg-red-400 transition-colors shadow-lg shadow-red-500/20"
-                  >
-                    Yes, Delete
-                  </button>
-                </div>
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      Delete Video?
+                    </h3>
+                    <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                      Are you sure you want to delete this video? Any unsaved
+                      progress on your tracer will be lost.
+                    </p>
+
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={() => setShowDeleteModal(false)}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => {
+                          setVideoSrc(null);
+                          setShowDeleteModal(false);
+                        }}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-red-500 text-white hover:bg-red-400 transition-colors shadow-lg shadow-red-500/20"
+                      >
+                        Yes, Delete
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
               </div>
-            </div>
-          </Modal>
+            )}
+          </AnimatePresence>
         </div>
-
-        {/* Tutorial trigger — own row, below the header bar */}
-        <button
-          onClick={() => setShowTutorial(true)}
-          className="flex items-center justify-center gap-2 w-full px-5 py-3 border-b border-white/5 text-amber-500 hover:bg-amber-500/10 transition-colors text-xs font-bold uppercase tracking-widest"
-        >
-          <PlayCircle size={16} />
-          Watch Tutorial
-        </button>
 
         <div className="p-5 space-y-6">
           <div className="grid grid-cols-2 gap-2">
@@ -3283,11 +3070,15 @@ export default function ShotTracerWeb() {
             </div>
 
             <div className="relative mb-8">
-              {/* Inline toast (CSS-animated, no framer-motion) */}
-              {colorModal.type && (
+              {/* MODAL OVERLAYS (AnimatePresence) */}
+              <AnimatePresence>
+                {colorModal.type && (
                   <div className="absolute top-[-140px] left-0 w-full z-50 flex justify-center pointer-events-none">
-                    <div
-                      className="bg-zinc-900 border border-white/20 shadow-2xl rounded-xl p-4 w-[260px] pointer-events-auto animate-in fade-in zoom-in slide-in-from-bottom-2 duration-200"
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                      className="bg-zinc-900 border border-white/20 shadow-2xl rounded-xl p-4 w-[260px] pointer-events-auto"
                     >
                       {colorModal.type === "limit" ? (
                         <div className="text-center">
@@ -3329,9 +3120,10 @@ export default function ShotTracerWeb() {
                           </div>
                         </div>
                       )}
-                    </div>
+                    </motion.div>
                   </div>
                 )}
+              </AnimatePresence>
 
               <div className="flex flex-col gap-2 mt-7">
                 {/* First row: Color wheel and first 4 favorites */}
@@ -3382,22 +3174,27 @@ export default function ShotTracerWeb() {
 
                   {/* First row of favorites (next to color wheel) - max 4 */}
                   <div className="flex w-full justify-evenly">
-                    {favorites.slice(0, 4).map((c) => (
-                      <div
-                        key={c}
-                        className="relative group animate-in fade-in zoom-in duration-200"
-                      >
-                        <button
-                          onClick={() => setTracerColor(c)}
-                          className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
-                            tracerColor === c
-                              ? "border-white border-3 scale-110"
-                              : "border-transparent hover:scale-105 hover:border-white hover:border-3"
-                          }`}
-                          style={{ backgroundColor: c }}
-                        />
-                      </div>
-                    ))}
+                    <AnimatePresence>
+                      {favorites.slice(0, 4).map((c) => (
+                        <motion.div
+                          key={c}
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          className="relative group"
+                        >
+                          <button
+                            onClick={() => setTracerColor(c)}
+                            className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
+                              tracerColor === c
+                                ? "border-white border-3 scale-110"
+                                : "border-transparent hover:scale-105 hover:border-white hover:border-3"
+                            }`}
+                            style={{ backgroundColor: c }}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
 
                     {/* Empty slots for first row */}
                     {Array.from({
@@ -3415,22 +3212,27 @@ export default function ShotTracerWeb() {
 
                 {/* Second row: Remaining favorites (6 slots) - full width */}
                 <div className="flex gap-1 w-full justify-evenly">
-                  {favorites.slice(4, 10).map((c) => (
-                    <div
-                      key={c}
-                      className="relative group animate-in fade-in zoom-in duration-200"
-                    >
-                      <button
-                        onClick={() => setTracerColor(c)}
-                        className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
-                          tracerColor === c
-                            ? "border-white border-3 scale-110"
-                            : "border-transparent hover:scale-105 hover:border-white hover:border-3"
-                        }`}
-                        style={{ backgroundColor: c }}
-                      />
-                    </div>
-                  ))}
+                  <AnimatePresence>
+                    {favorites.slice(4, 10).map((c) => (
+                      <motion.div
+                        key={c}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        className="relative group"
+                      >
+                        <button
+                          onClick={() => setTracerColor(c)}
+                          className={`w-8 h-8 rounded-full border-2 shadow-sm transition-all relative overflow-hidden ${
+                            tracerColor === c
+                              ? "border-white border-3 scale-110"
+                              : "border-transparent hover:scale-105 hover:border-white hover:border-3"
+                          }`}
+                          style={{ backgroundColor: c }}
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
 
                   {/* Empty slots for second row - up to 6 */}
                   {Array.from({
@@ -3810,135 +3612,161 @@ export default function ShotTracerWeb() {
             )}
           </button>
 
-          <Modal
-            open={showExportModal}
-            onClose={() => setShowExportModal(false)}
-            label="Export video confirmation"
-          >
-            <div className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full shadow-2xl overflow-hidden">
-              {/* Glow Effect */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]" />
+          <AnimatePresence>
+            {showExportModal && (
+              <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                {/* Click outside to close */}
+                <div
+                  className="absolute inset-0"
+                  onClick={() => setShowExportModal(false)}
+                />
 
-              <div className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mb-4 text-amber-500 border border-amber-500/20">
-                  <Download size={24} />
-                </div>
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+                >
+                  {/* Glow Effect */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]" />
 
-                <h3 className="text-xl font-bold text-white mb-2">
-                  Export Video?
-                </h3>
-                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                  Are you sure you want to export this video?
-                </p>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mb-4 text-amber-500 border border-amber-500/20">
+                      <Download size={24} />
+                    </div>
 
-                <div className="flex gap-3 w-full">
-                  <button
-                    onClick={() => setShowExportModal(false)}
-                    className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleExport();
-                      setShowExportModal(false);
-                    }}
-                    className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-amber-500 text-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
-                  >
-                    <Download size={18} /> Yes, Export
-                  </button>
-                </div>
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      Export Video?
+                    </h3>
+                    <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                      Are you sure you want to export this video?
+                    </p>
+
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={() => setShowExportModal(false)}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleExport();
+                          setShowExportModal(false);
+                        }}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-amber-500 text-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+                      >
+                        <Download size={18} /> Yes, Export
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
               </div>
-            </div>
-          </Modal>
+            )}
+          </AnimatePresence>
 
-          <Modal
-            open={showExportFailed}
-            onClose={() => setShowExportFailed(false)}
-            label="Export failed"
-          >
-            <div className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full shadow-2xl overflow-hidden">
-              {/* Glow Effect */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]" />
-
-              <div className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4 text-red-500 border border-red-500/20">
-                  <AlertTriangle size={24} />
-                </div>
-
-                <h3 className="text-xl font-bold text-white mb-2">
-                  Export Failed
-                </h3>
-
-                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                  Please try again using a different browser (Chrome, Opera or
-                  Edge is recommended).
-                </p>
-
-                <div className="flex gap-3 w-full">
-                  <button
-                    onClick={() => setShowExportFailed(false)}
-                    className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Modal>
-
-          <Modal
-            open={showExportSuccess}
-            onClose={() => setShowExportSuccess(false)}
-            label="Export complete"
-          >
-            <div className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full shadow-2xl overflow-hidden">
-              {/* Glow Effect */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)]" />
-
-              <div className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center mb-4 text-emerald-500 border border-emerald-500/20">
-                  <CheckCircle size={24} />
-                </div>
-
-                <h3 className="text-xl font-bold text-white mb-2">
-                  Export Complete
-                </h3>
-
-                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                  Your video was successfully exported and downloaded.
-                </p>
-
-                <div className="flex gap-3 w-full">
-                  <button
-                    onClick={() => setShowExportSuccess(false)}
-                    className="flex-1 py-3 px-4 rounded-xl font-bold text-md bg-emerald-500 text-black hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20"
-                  >
-                    Great!
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Modal>
-
-          {/* Tutorial video (studio) */}
-          <Modal
-            open={showTutorial}
-            onClose={() => setShowTutorial(false)}
-            maxWidth="max-w-3xl"
-            label="Shot Tracer tutorial video"
-          >
-            <div className="relative">
-              <button
-                onClick={() => setShowTutorial(false)}
-                aria-label="Close tutorial"
-                className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-zinc-900 border border-white/10 text-white flex items-center justify-center hover:bg-zinc-800 transition-colors shadow-lg"
+          <AnimatePresence>
+            {showExportFailed && (
+              <motion.div
+                className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
-                <X size={18} />
-              </button>
-              <TutorialVideo title="How to add shot tracers to your golf videos" />
-            </div>
-          </Modal>
+                {/* Click outside to close */}
+                <div
+                  className="absolute inset-0"
+                  onClick={() => setShowExportFailed(false)}
+                />
+
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+                >
+                  {/* Glow Effect */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]" />
+
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4 text-red-500 border border-red-500/20">
+                      <AlertTriangle size={24} />
+                    </div>
+
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      Export Failed
+                    </h3>
+
+                    <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                      Please try again using a different browser (Chrome, Opera
+                      or Edge is recommended).
+                    </p>
+
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={() => setShowExportFailed(false)}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showExportSuccess && (
+              <motion.div
+                className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {/* Click outside to close */}
+                <div
+                  className="absolute inset-0"
+                  onClick={() => setShowExportSuccess(false)}
+                />
+
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl overflow-hidden"
+                >
+                  {/* Glow Effect */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)]" />
+
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center mb-4 text-emerald-500 border border-emerald-500/20">
+                      <CheckCircle size={24} />
+                    </div>
+
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      Export Complete
+                    </h3>
+
+                    <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                      Your video was successfully exported and downloaded.
+                    </p>
+
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={() => setShowExportSuccess(false)}
+                        className="flex-1 py-3 px-4 rounded-xl font-bold text-md bg-emerald-500 text-black hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20"
+                      >
+                        Great!
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

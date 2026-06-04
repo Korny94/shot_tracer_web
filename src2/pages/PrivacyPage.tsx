@@ -127,7 +127,6 @@ const TermsPage = () => {
   //       </Paragraph>
   //     ),
   //   },
-  //   // Additional sections follow the same pattern
   // ];
 
   const sections = [
@@ -135,176 +134,175 @@ const TermsPage = () => {
       title: "1. Introduction",
       content: (
         <Paragraph>
-          Welcome to MaxBogey! By using the MaxBogey app or website, you agree
-          to these Terms of Service (“Terms”). These Terms govern your access to
-          and use of MaxBogey, including all content, features, and services. If
-          you do not agree to these Terms, do not use the app or website.
+          This Privacy Policy explains how MaxBogey collects, uses, and protects
+          personal data when you use the MaxBogey app. We are committed to
+          safeguarding your privacy and processing personal data in accordance
+          with the General Data Protection Regulation (GDPR).
         </Paragraph>
       ),
     },
     {
-      title: "2. Eligibility",
+      title: "2. Data Controller and Contact Information",
       content: (
         <Paragraph>
-          You must be at least the legal age of majority in your country, or if
-          under that age, you may only use MaxBogey with the consent of a parent
-          or legal guardian. By using the app, you represent and warrant that
-          you meet these eligibility requirements.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "3. Account Registration",
-      content: (
-        <Paragraph>
-          To access certain features, you may need to create an account. You
-          agree to provide accurate, complete, and up-to-date information. You
-          are responsible for keeping your password secure and for all activity
-          under your account. Notify us immediately of any unauthorized use.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "4. User Conduct",
-      content: (
-        <Paragraph>
-          You agree not to:
-          <ul>
-            <li>Violate any laws or regulations while using MaxBogey.</li>
-            <li>Harass, abuse, or harm other users.</li>
-            <li>Post or share illegal, offensive, or inappropriate content.</li>
-            <li>Attempt to interfere with or disrupt the app or website.</li>
-            <li>Access other users’ accounts without permission.</li>
-          </ul>
-          MaxBogey reserves the right to remove content or suspend accounts
-          violating these rules.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "5. User Content",
-      content: (
-        <Paragraph>
-          By posting content (e.g., images, posts, statistics) you grant
-          MaxBogey a non-exclusive, worldwide, royalty-free license to use,
-          display, and distribute your content in connection with the app. You
-          retain ownership of your content. You are solely responsible for the
-          content you post.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "6. Intellectual Property",
-      content: (
-        <Paragraph>
-          All MaxBogey content, branding, software, and designs are the property
-          of MaxBogey or its licensors and are protected by copyright,
-          trademark, and other intellectual property laws. You may not copy,
-          modify, or distribute our content or features without permission.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "7. Third-Party Services",
-      content: (
-        <Paragraph>
-          The app may use third-party services, including WordPress for content
-          management. MaxBogey is not responsible for the policies or actions of
-          third-party services. Using those services may be subject to
-          additional terms.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "8. Privacy",
-      content: (
-        <Paragraph>
-          Your use of MaxBogey is also governed by our Privacy Policy, which
-          explains how we collect, use, and protect your personal data.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "9. Cookies, Analytics and Local Storage",
-      content: (
-        <Paragraph>
-          Our website uses <BoldText>Google Analytics</BoldText> to measure
-          visits and improve the service. Analytics cookies are set only if you
-          accept them in our cookie banner, and you can withdraw consent at any
-          time via the <BoldText>“Cookie Settings”</BoldText> link in the footer.
-          The web Shot Tracer also stores your settings and presets in your
-          browser’s local storage so your preferences are remembered between
-          visits — this data never leaves your device, and any video you load is
-          processed entirely within your browser and is{" "}
-          <BoldText>not uploaded to our servers</BoldText>. For full details, see
-          our{" "}
-          <Link style={{ color: "#fe9a00" }} to="/privacy">
-            Privacy Policy
-          </Link>
-          .
-        </Paragraph>
-      ),
-    },
-    {
-      title: "10. Limitation of Liability",
-      content: (
-        <Paragraph>
-          MaxBogey and its owners are not liable for any direct, indirect,
-          incidental, or consequential damages arising from your use of the app
-          or website, including data loss, downtime, or errors. Use the app at
-          your own risk.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "11. Disclaimer of Warranties",
-      content: (
-        <Paragraph>
-          The app and website are provided “as is” and “as available,” without
-          warranties of any kind, express or implied. We do not guarantee
-          uninterrupted service, accuracy of content, or compatibility with your
-          device.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "12. Account Termination",
-      content: (
-        <Paragraph>
-          We may suspend or terminate accounts at our discretion for violations
-          of these Terms, illegal activity, or harmful behavior. Users may also
-          delete their accounts at any time, which will remove personal data
-          according to our Privacy Policy.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "13. Governing Law",
-      content: (
-        <Paragraph>
-          These Terms are governed by the laws of Norway. Any disputes must be
-          resolved in the Norwegian courts unless otherwise required by law.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "14. Changes to Terms",
-      content: (
-        <Paragraph>
-          MaxBogey may update these Terms at any time. Continued use after
-          updates means you accept the new Terms.
-        </Paragraph>
-      ),
-    },
-    {
-      title: "15. Contact",
-      content: (
-        <Paragraph>
-          For questions about these Terms, please contact us at{" "}
+          MaxBogey, <BoldText>Nøkling</BoldText>, is the data controller
+          responsible for processing your personal data. If you have any
+          questions about this Privacy Policy or how your data is handled, you
+          may contact us at{" "}
           <Link style={{ color: "#fe9a00" }} to="/contact">
             contact@maxbogey.com
           </Link>
           .
+        </Paragraph>
+      ),
+    },
+    {
+      title: "3. Data Collection",
+      content: (
+        <Paragraph>
+          MaxBogey does not require users to create an account to use the app.
+          However, if you choose to create an account, we may collect the
+          following personal data:
+          <ul>
+            <li>
+              <BoldText>Required Account Data:</BoldText> Username, email
+              address, and password (stored in encrypted form and not readable
+              by us).
+            </li>
+            <li>
+              <BoldText>Optional Data:</BoldText> Posts, images, shot
+              statistics, notes, logs, goals, golf club details, and yardages
+              that you voluntarily choose to provide.
+            </li>
+          </ul>
+          Users who do not create an account will not have personal data stored
+          by MaxBogey.
+        </Paragraph>
+      ),
+    },
+    {
+      title: "4. How We Use Your Data",
+      content: (
+        <Paragraph>
+          We use personal data solely for the following purposes:
+          <ul>
+            <li>To operate, maintain, and improve the MaxBogey app.</li>
+            <li>
+              To enable optional features such as posting content and tracking
+              statistics.
+            </li>
+            <li>To create and manage user accounts and authentication.</li>
+          </ul>
+          Optional data is processed only when you actively choose to use the
+          related features.
+        </Paragraph>
+      ),
+    },
+    {
+      title: "5. Legal Basis for Processing",
+      content: (
+        <Paragraph>
+          The legal basis for processing your personal data is your consent
+          under Article 6(1)(a) of the GDPR. Consent is given when you create an
+          account, submit content, or otherwise voluntarily provide personal
+          data. You may withdraw your consent at any time.
+        </Paragraph>
+      ),
+    },
+    {
+      title: "6. Data Storage and Retention",
+      content: (
+        <Paragraph>
+          We store personal data only for as long as it is necessary to provide
+          the MaxBogey app. When you delete your account or request deletion of
+          your personal data,{" "}
+          <BoldText>
+            all personal data is permanently deleted immediately
+          </BoldText>
+          , unless retention is required by law.
+        </Paragraph>
+      ),
+    },
+    {
+      title: "7. Data Sharing and Third-Party Services",
+      content: (
+        <Paragraph>
+          MaxBogey does not sell or share your personal data with third parties
+          for marketing purposes. The app uses WordPress as a headless content
+          management system to store and manage user-generated content and app
+          data. Personal data is processed only to the extent necessary to
+          operate the service and is not used for unrelated purposes.
+        </Paragraph>
+      ),
+    },
+    {
+      title: "8. Data Security",
+      content: (
+        <Paragraph>
+          We take appropriate technical and organizational measures to protect
+          personal data against unauthorized access, loss, misuse, or
+          alteration. This includes secure storage, encryption where
+          appropriate, and access controls.
+        </Paragraph>
+      ),
+    },
+    {
+      title: "9. Children’s Privacy",
+      content: (
+        <Paragraph>
+          MaxBogey is intended for users aged 3 and above. Users who are under
+          the legal age of adulthood may only use the app with the consent and
+          supervision of a parent or legal guardian. We do not knowingly collect
+          personal data from children without parental consent.
+        </Paragraph>
+      ),
+    },
+    {
+      title: "10. Your Rights Under GDPR",
+      content: (
+        <Paragraph>
+          As a user in the European Economic Area (EEA), you have the following
+          rights:
+          <ul style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <li>
+              <BoldText>Right of Access:</BoldText> Request access to your
+              personal data.
+            </li>
+            <li>
+              <BoldText>Right to Rectification:</BoldText> Request correction of
+              inaccurate data.
+            </li>
+            <li>
+              <BoldText>Right to Erasure:</BoldText> Request immediate deletion
+              of your data.
+            </li>
+            <li>
+              <BoldText>Right to Restrict Processing:</BoldText> Request limited
+              processing of data.
+            </li>
+            <li>
+              <BoldText>Right to Data Portability:</BoldText> Request your data
+              in a portable format.
+            </li>
+            <li>
+              <BoldText>Right to Withdraw Consent:</BoldText> Withdraw consent
+              at any time by deleting your account or contacting us at{" "}
+              <Link style={{ color: "#fe9a00" }} to="/contact">
+                contact@maxbogey.com
+              </Link>
+              .
+            </li>
+          </ul>
+        </Paragraph>
+      ),
+    },
+    {
+      title: "11. Supervisory Authority",
+      content: (
+        <Paragraph>
+          If you believe that your personal data has been processed unlawfully,
+          you have the right to lodge a complaint with the Norwegian Data
+          Protection Authority (Datatilsynet).
         </Paragraph>
       ),
     },
@@ -314,7 +312,7 @@ const TermsPage = () => {
     <div className="min-h-screen bg-black text-gray-300 py-20 px-4">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-white mb-12 border-l-4 border-amber-500 pl-6">
-          TERMS OF SERVICE
+          PRIVACY POLICY
         </h1>
         <div className="space-y-12">
           {sections.map((section, idx) => (

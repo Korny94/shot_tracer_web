@@ -225,28 +225,7 @@ const TermsPage = () => {
       ),
     },
     {
-      title: "9. Cookies, Analytics and Local Storage",
-      content: (
-        <Paragraph>
-          Our website uses <BoldText>Google Analytics</BoldText> to measure
-          visits and improve the service. Analytics cookies are set only if you
-          accept them in our cookie banner, and you can withdraw consent at any
-          time via the <BoldText>“Cookie Settings”</BoldText> link in the footer.
-          The web Shot Tracer also stores your settings and presets in your
-          browser’s local storage so your preferences are remembered between
-          visits — this data never leaves your device, and any video you load is
-          processed entirely within your browser and is{" "}
-          <BoldText>not uploaded to our servers</BoldText>. For full details, see
-          our{" "}
-          <Link style={{ color: "#fe9a00" }} to="/privacy">
-            Privacy Policy
-          </Link>
-          .
-        </Paragraph>
-      ),
-    },
-    {
-      title: "10. Limitation of Liability",
+      title: "9. Limitation of Liability",
       content: (
         <Paragraph>
           MaxBogey and its owners are not liable for any direct, indirect,
@@ -257,7 +236,7 @@ const TermsPage = () => {
       ),
     },
     {
-      title: "11. Disclaimer of Warranties",
+      title: "10. Disclaimer of Warranties",
       content: (
         <Paragraph>
           The app and website are provided “as is” and “as available,” without
@@ -268,7 +247,7 @@ const TermsPage = () => {
       ),
     },
     {
-      title: "12. Account Termination",
+      title: "11. Account Termination",
       content: (
         <Paragraph>
           We may suspend or terminate accounts at our discretion for violations
@@ -279,7 +258,7 @@ const TermsPage = () => {
       ),
     },
     {
-      title: "13. Governing Law",
+      title: "12. Governing Law",
       content: (
         <Paragraph>
           These Terms are governed by the laws of Norway. Any disputes must be
@@ -288,7 +267,7 @@ const TermsPage = () => {
       ),
     },
     {
-      title: "14. Changes to Terms",
+      title: "13. Changes to Terms",
       content: (
         <Paragraph>
           MaxBogey may update these Terms at any time. Continued use after
@@ -297,7 +276,7 @@ const TermsPage = () => {
       ),
     },
     {
-      title: "15. Contact",
+      title: "14. Contact",
       content: (
         <Paragraph>
           For questions about these Terms, please contact us at{" "}

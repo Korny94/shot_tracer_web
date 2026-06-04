@@ -236,7 +236,72 @@ const TermsPage = () => {
       ),
     },
     {
-      title: "8. Data Security",
+      title: "8. Cookies and Analytics",
+      content: (
+        <Paragraph>
+          Our website uses <BoldText>Google Analytics</BoldText>, a web
+          analytics service provided by Google, solely to measure how many
+          people visit the site and how it is used so that we can improve it.
+          Google Analytics stores a cookie on your device and processes limited
+          data such as a randomly generated identifier, the pages you view, your
+          approximate location (derived from a shortened, anonymized IP
+          address), and your device and browser type.
+          <ul>
+            <li>
+              <BoldText>Consent first:</BoldText> Google Analytics is only
+              loaded after you click “Accept” in our cookie banner. If you
+              decline, no analytics cookie is set and no analytics data is
+              collected.
+            </li>
+            <li>
+              <BoldText>Change your mind anytime:</BoldText> You can withdraw or
+              update your choice at any time through the{" "}
+              <BoldText>“Cookie Settings”</BoldText> link in the website footer.
+            </li>
+            <li>
+              <BoldText>Legal basis:</BoldText> Your consent under Article
+              6(1)(a) of the GDPR, together with applicable ePrivacy (cookie)
+              rules.
+            </li>
+          </ul>
+          We have enabled IP anonymization. Google may process this data outside
+          the EEA under its own terms and applicable transfer safeguards. We do
+          not use analytics data to identify you personally or for advertising.
+        </Paragraph>
+      ),
+    },
+    {
+      title: "9. Local Storage on Your Device (Shot Tracer Tool)",
+      content: (
+        <Paragraph>
+          The web-based Shot Tracer tool saves your preferences and presets —
+          such as tracer color, width and opacity, graphic sizes, hole and
+          player details, your saved favorite colors, and your last-used
+          settings — in your browser’s <BoldText>local storage</BoldText>.
+          <ul>
+            <li>
+              This information stays <BoldText>on your own device</BoldText>. It
+              is used only to remember your settings between visits and is never
+              transmitted to us or any third party.
+            </li>
+            <li>
+              It is strictly functional and therefore does not require consent.
+            </li>
+            <li>
+              Any video you load into the Shot Tracer is processed{" "}
+              <BoldText>entirely within your browser</BoldText> and is never
+              uploaded to our servers.
+            </li>
+            <li>
+              You can remove this data at any time by clearing your browser’s
+              site data for this website.
+            </li>
+          </ul>
+        </Paragraph>
+      ),
+    },
+    {
+      title: "10. Data Security",
       content: (
         <Paragraph>
           We take appropriate technical and organizational measures to protect
@@ -247,7 +312,7 @@ const TermsPage = () => {
       ),
     },
     {
-      title: "9. Children’s Privacy",
+      title: "11. Children’s Privacy",
       content: (
         <Paragraph>
           MaxBogey is intended for users aged 3 and above. Users who are under
@@ -258,7 +323,7 @@ const TermsPage = () => {
       ),
     },
     {
-      title: "10. Your Rights Under GDPR",
+      title: "12. Your Rights Under GDPR",
       content: (
         <Paragraph>
           As a user in the European Economic Area (EEA), you have the following
@@ -297,7 +362,7 @@ const TermsPage = () => {
       ),
     },
     {
-      title: "11. Supervisory Authority",
+      title: "13. Supervisory Authority",
       content: (
         <Paragraph>
           If you believe that your personal data has been processed unlawfully,

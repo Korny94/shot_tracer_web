@@ -1,12 +1,19 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!--
-      Google Analytics is intentionally NOT loaded here.
-      It is loaded only AFTER the visitor accepts cookies, via
-      src/components/CookieConsent.tsx (GDPR / ePrivacy compliant).
-      Do not re-add a gtag.js <script> tag to this file.
-    -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-RLDK09FJWV"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-RLDK09FJWV");
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
