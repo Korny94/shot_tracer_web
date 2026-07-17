@@ -2,6 +2,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import ScrollToTop from "./components/components";
 import Home from "./pages/Home";
 import ShotTracer from "./pages/ShotTracer";
+import TracerStudioPage from "./pages/TracerStudioPage";
 import AboutPage from "./pages/AboutPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
@@ -29,6 +30,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/shot-tracer" element={<ShotTracer />} />
+          <Route path="/golf-video-editor" element={<TracerStudioPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/faq" element={<FAQPage />} />

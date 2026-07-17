@@ -1,0 +1,15 @@
+# MaxBogey — allow everything, point crawlers at the sitemap
+User-agent: *
+Allow: /
+
+# AI crawlers welcome (helps ChatGPT/Claude/Perplexity recommend MaxBogey)
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://maxbogey.com/sitemap.xml

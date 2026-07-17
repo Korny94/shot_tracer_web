@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Modal from "../components/Modal";
-import TutorialVideo from "../components/TutorialVideo";
+import Seo from "../components/Seo";
+import TutorialVideo, {
+  SHOT_TRACER_TUTORIAL_ID,
+  TRACERSTUDIO_TUTORIAL_ID,
+} from "../components/TutorialVideo";
 import {
   ChevronUp,
   Target,
@@ -40,6 +44,13 @@ import {
   Zap,
   MessageSquare,
   AlertTriangle,
+  Clapperboard,
+  Sparkles,
+  Wand2,
+  Tv,
+  Music,
+  Download,
+  Smartphone,
 } from "lucide-react";
 import { SiArchicad } from "react-icons/si";
 
@@ -291,18 +302,30 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <Seo
+        title="Shot Tracer Free Online + Golf Video Editor | MaxBogey"
+        description="Add shot tracers to your golf videos for free — trace a single clip online in seconds, or build entire YouTube golf videos with TracerStudio, the world's first golf video editor. Plus the free MaxBogey golf app for Android."
+        path="/"
+      />
       {/* Hero Section */}
-      <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden py-20">
         {/* Background Gradient/Image Placeholder */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-black to-black z-0"></div>
         <div className="absolute inset-0 bg-[url('https://transparenttextures.com/patterns/carbon-fibre.png')] z-0"></div>
 
         {/* Content */}
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-600">
-            SHOT TRACER <br />
-            <span className=" drop-shadow-[0_0_15px_rgba(245,158,11,0.4)] text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">
-              FREE
+        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
+          <Link
+            to="/golf-video-editor"
+            className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-400 text-xs md:text-sm font-bold tracking-wide uppercase hover:bg-amber-500/20 transition-colors"
+          >
+            <Sparkles size={14} /> New: TracerStudio — the world's first golf
+            video editor →
+          </Link>
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-600">
+            MAX
+            <span className="pr-2 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)] text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">
+              BOGEY
             </span>
           </h1>
           {/* <h1
@@ -318,42 +341,171 @@ const Home = () => {
             The all-in-one golf ecosystem. 42,000+ courses, advanced analytics,
             and the revolutionary new Shot Tracer.
           </p> */}
-          <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-            Add Shot Tracers to Your Golf Videos in Seconds
+          <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
+            Shot tracers, a full golf video editor, and an all-in-one golf app.
+            Everything a golfer needs — completely free.
           </p>
-          <div className="flex flex-col md:flex-row gap-4 justify-center">
-            {/* <Link
-              to="/shot-tracer"
-              className="px-8 py-4 bg-amber-500 text-black font-bold rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:shadow-[0_0_30px_rgba(255,255,255,0.6)]"
-            >
-              TRY SHOT TRACER
-            </Link> */}
-            <button
-              onClick={() => {
-                if (isMobile) {
-                  setShowModal(true);
-                } else {
-                  navigate("/shot-tracer");
-                }
-              }}
-              className="px-8 py-4 bg-amber-500 text-black font-bold rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:shadow-[0_0_30px_rgba(255,255,255,0.6)]"
-            >
-              TRY NOW
-            </button>
 
-            <button
-              onClick={() =>
-                window.open(
-                  "https://play.google.com/store/apps/details?id=com.rbkorny.maxbogeyapp",
-                  "_blank",
-                  "noopener,noreferrer",
-                )
-              }
-              className="px-8 py-4 bg-transparent border border-gray-600 text-white font-bold rounded-full hover:border-white hover:bg-white/5 transition-all"
-            >
-              DOWNLOAD APP
-            </button>
+          {/* Tool picker — landing-page style */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-left">
+            {/* Shot Tracer */}
+            <div className="flex flex-col bg-black/60 backdrop-blur border border-white/10 rounded-2xl p-7 hover:border-gray-400/60 transition-colors">
+              <div className="flex items-center gap-3 mb-3 text-gray-300">
+                <Video size={22} />
+                <h2 className="text-lg font-bold text-white">Shot Tracer</h2>
+              </div>
+              <p className="text-sm text-gray-400 leading-relaxed mb-6 flex-grow">
+                Trace a single golf clip in seconds. Upload, trace, download —
+                perfect for Instagram and TikTok.
+              </p>
+              <button
+                onClick={() => {
+                  if (isMobile) {
+                    setShowModal(true);
+                  } else {
+                    navigate("/shot-tracer");
+                  }
+                }}
+                className="w-full py-3 px-4 rounded-full font-bold text-sm bg-zinc-800 text-white hover:bg-white hover:text-black transition-colors text-center"
+              >
+                TRY SHOT TRACER
+              </button>
+            </div>
+
+            {/* TracerStudio — the flagship */}
+            <div className="relative flex flex-col bg-black/60 backdrop-blur border border-amber-500/50 rounded-2xl p-7 shadow-[0_0_30px_rgba(245,158,11,0.12)]">
+              <span className="absolute -top-3 left-6 px-3 py-0.5 bg-amber-500 text-black text-xs font-bold rounded-full uppercase tracking-wider">
+                <Sparkles className="inline -mt-0.5 mr-1" size={11} />
+                New
+              </span>
+              <div className="flex items-center gap-3 mb-3 text-amber-500">
+                <Clapperboard size={22} />
+                <h2 className="text-lg font-bold text-white">Tracer Studio</h2>
+              </div>
+              <p className="text-sm text-gray-400 leading-relaxed mb-6 flex-grow">
+                Build entire YouTube golf videos — tracers, TV graphics, music,
+                one export. Works on any device, right in the browser.
+              </p>
+              <a
+                href="https://maxbogey.com/tracerstudio/"
+                className="w-full py-3 px-4 rounded-full font-bold text-sm bg-amber-500 text-black hover:bg-white transition-colors shadow-lg shadow-amber-500/20 text-center"
+              >
+                TRY TRACERSTUDIO
+              </a>
+              <Link
+                to="/golf-video-editor"
+                className="mt-3 text-center text-xs text-gray-500 hover:text-amber-500 transition-colors"
+              >
+                Learn more →
+              </Link>
+            </div>
+
+            {/* MaxBogey App */}
+            <div className="flex flex-col bg-black/60 backdrop-blur border border-white/10 rounded-2xl p-7 hover:border-gray-400/60 transition-colors">
+              <div className="flex items-center gap-3 mb-3 text-gray-300">
+                <Smartphone size={22} />
+                <h2 className="text-lg font-bold text-white">MaxBogey App</h2>
+              </div>
+              <p className="text-sm text-gray-400 leading-relaxed mb-6 flex-grow">
+                The all-in-one golf app: 42,000+ courses with GPS, smart
+                scorecard, stats and more. Android now, iOS soon.
+              </p>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.rbkorny.maxbogeyapp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 px-4 rounded-full font-bold text-sm bg-zinc-800 text-white hover:bg-white hover:text-black transition-colors text-center"
+              >
+                DOWNLOAD APP
+              </a>
+            </div>
           </div>
+
+          <p className="mt-6 text-sm text-gray-600">
+            100% free · No watermarks · No subscriptions
+          </p>
+        </div>
+      </section>
+
+      {/* TracerStudio - "The Flagship" */}
+      <section className="py-24 relative bg-black overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-14">
+            <span className="inline-flex items-center gap-2 text-amber-500 font-bold tracking-widest uppercase text-sm mb-3">
+              <Sparkles size={14} /> World Premiere
+            </span>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-600">
+              TRACER
+              <span className="pr-2 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)] text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">
+                STUDIO
+              </span>
+            </h2>
+            <p className="text-gray-400 text-lg max-w-3xl mx-auto">
+              The first video editor ever built for golf. Cut whole rounds on a
+              timeline, trace every shot — even handheld footage, thanks to
+              motion tracking — add TV broadcast graphics and music, and export
+              one finished YouTube video. Free, like everything we make.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+            {[
+              {
+                icon: Clapperboard,
+                title: "Full Timeline Editor",
+                text: "Cut, split, trim and reorder whole rounds — not just one clip.",
+              },
+              {
+                icon: Wand2,
+                title: "Motion Tracking",
+                text: "Tracers stay locked on target even when the camera is handheld.",
+              },
+              {
+                icon: Tv,
+                title: "TV Broadcast Graphics",
+                text: "Player cards, scorecards, distance counters, wind and more.",
+              },
+              {
+                icon: Music,
+                title: "Music & One Export",
+                text: "Mix in music, then export the whole video in original quality.",
+              },
+            ].map((f) => (
+              <div
+                key={f.title}
+                className="bg-zinc-900/60 border border-white/5 rounded-xl p-6 hover:border-amber-500/50 transition-colors"
+              >
+                <f.icon className="text-amber-500 mb-3" size={24} />
+                <h3 className="font-bold text-white mb-1">{f.title}</h3>
+                <p className="text-sm text-gray-400">{f.text}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
+            <a
+              href="https://maxbogey.com/tracerstudio/"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-amber-500 text-black font-bold rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(245,158,11,0.4)]"
+            >
+              <Clapperboard size={20} /> OPEN TRACERSTUDIO
+            </a>
+            <a
+              href="https://maxbogey.com/tracerstudio/TracerStudio.zip"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-transparent border border-gray-600 text-white font-bold rounded-full hover:border-white hover:bg-white/5 transition-all"
+            >
+              <Download size={20} /> DOWNLOAD FOR WINDOWS
+            </a>
+            <Link
+              to="/golf-video-editor"
+              className="text-gray-400 hover:text-amber-500 transition-colors font-medium"
+            >
+              Learn more →
+            </Link>
+          </div>
+          <p className="mt-4 text-center text-sm text-gray-600">
+            Runs in your browser or on Windows · macOS coming soon · 100% free
+          </p>
         </div>
       </section>
 
@@ -409,10 +561,10 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Tutorial Video - "How It Works" */}
+      {/* Tutorial Videos - "How It Works" */}
       <section className="py-24 bg-black relative">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="text-amber-500 font-bold tracking-widest uppercase text-sm mb-2 block">
               Watch & Learn
@@ -421,11 +573,62 @@ const Home = () => {
               HOW IT WORKS
             </h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
-              See how to add pro-level shot tracers to your golf videos in just
-              a few simple steps.
+              Two free tools, two quick tutorials. Pick the one that matches
+              what you're making.
             </p>
           </div>
-          <TutorialVideo />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Shot Tracer tutorial */}
+            <div className="bg-zinc-900/50 border border-white/10 rounded-2xl p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="px-3 py-1 rounded-full bg-zinc-800 border border-white/10 text-gray-300 text-xs font-bold uppercase tracking-wider">
+                  Shot Tracer
+                </span>
+                <h3 className="text-lg font-bold text-white">
+                  Trace a single clip
+                </h3>
+              </div>
+              <p className="text-gray-500 text-sm mb-5">
+                The quick online tool: upload one shot, add a tracer and
+                graphics, download. Perfect for social clips.
+              </p>
+              <TutorialVideo
+                videoId={SHOT_TRACER_TUTORIAL_ID}
+                title="Shot Tracer tutorial: add a shot tracer to a golf clip in seconds"
+              />
+            </div>
+
+            {/* TracerStudio tutorial */}
+            <div className="relative bg-zinc-900/50 border border-amber-500/40 rounded-2xl p-6 md:p-8 shadow-[0_0_30px_rgba(245,158,11,0.08)]">
+              <span className="absolute -top-3 left-6 px-3 py-0.5 bg-amber-500 text-black text-xs font-bold rounded-full uppercase tracking-wider">
+                <Sparkles className="inline -mt-0.5 mr-1" size={11} />
+                New
+              </span>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-400 text-xs font-bold uppercase tracking-wider">
+                  TracerStudio
+                </span>
+                <h3 className="text-lg font-bold text-white">
+                  Build an entire golf video
+                </h3>
+              </div>
+              <p className="text-gray-500 text-sm mb-5">
+                The full editor: timeline, tracers with motion tracking, TV
+                graphics, music and one-click export.{" "}
+                <Link
+                  to="/golf-video-editor"
+                  className="text-amber-500 hover:text-amber-400"
+                >
+                  Learn more →
+                </Link>
+              </p>
+              <TutorialVideo
+                videoId={TRACERSTUDIO_TUTORIAL_ID}
+                title="TracerStudio tutorial: build your entire golf video, step by step"
+              />
+            </div>
+          </div>
         </div>
       </section>
 

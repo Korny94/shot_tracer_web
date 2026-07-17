@@ -20,9 +20,9 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-1 md:col-span-1">
-            <span className="text-2xl font-bold text-white">
+            <span className="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-600">
               MAX
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">
+              <span className="pr-1 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)] text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">
                 BOGEY
               </span>
             </span>
@@ -36,6 +36,14 @@ const Footer = () => {
               Discover
             </h3>
             <ul className="space-y-2 text-gray-400 text-sm">
+              <li>
+                <Link
+                  to="/golf-video-editor"
+                  className="hover:text-amber-500 transition-colors"
+                >
+                  TracerStudio — Golf Video Editor
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/shot-tracer"
