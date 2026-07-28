@@ -6,6 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import Modal from "../components/Modal";
+import Seo from "../components/Seo";
 import TutorialVideo from "../components/TutorialVideo";
 import { Link, useNavigate } from "react-router-dom";
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
@@ -2600,6 +2601,11 @@ export default function ShotTracerWeb() {
       onPointerUp={onPointerUp}
       onPointerMove={onPointerMove}
     >
+      <Seo
+        title="Shot Tracer Free Online — Add a Shot Tracer to Your Golf Video | MaxBogey"
+        description="Free online golf shot tracer: upload a clip, trace the ball flight with broadcast-style graphics, and download in seconds. No app, no watermark, no cost. For bigger projects, try TracerStudio — the free golf video editor."
+        path="/shot-tracer"
+      />
       {/* EXPORT OVERLAY */}
       {isExporting && (
         <div className="absolute inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center">

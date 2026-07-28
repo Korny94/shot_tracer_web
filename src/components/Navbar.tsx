@@ -10,6 +10,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navLinks = [
     { name: "Home", path: "/" },
+    { name: "TracerStudio", path: "/golf-video-editor" },
     { name: "Shot Tracer", path: "/shot-tracer" },
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
@@ -26,18 +27,17 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center space-x-6 group">
-            <span className="text-2xl font-bold tracking-tighter text-white">
+            <span className="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-600">
               MAX
-              <span
-                className="pr-1 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600 
-"
-              >
+              <span className="pr-1 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)] text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">
                 BOGEY
               </span>
             </span>
           </Link>
 
-          <div className="hidden md:block">
+          {/* Desktop nav only above 1175px — below that (including high zoom
+              levels) the hamburger menu takes over so nothing overflows. */}
+          <div className="hidden min-[1175px]:block">
             <div className="ml-10 flex items-baseline space-x-8">
               {navLinks.map((link) => (
                 <button
@@ -70,7 +70,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          <div className="-mr-2 flex md:hidden">
+          <div className="-mr-2 flex min-[1175px]:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-400 hover:text-white p-2"
@@ -83,7 +83,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-black/95 backdrop-blur-xl border-b border-white/10">
+        <div className="min-[1175px]:hidden bg-black/95 backdrop-blur-xl border-b border-white/10">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navLinks.map((link) => (
               <button
